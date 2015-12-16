@@ -1,0 +1,12 @@
+Changelog
+
+v2.0
+(planned) Support for time fixing
+(planned) Import/export config
+
+v1.1 (12/13/2015)
+- WastelandItemBoost pet not marked as percent
+- Replace all equipped weapons/outfits checked by default
+- Separate list for replacing equipped weapons/outfits
+
+v1.0 (12/13/2015)
