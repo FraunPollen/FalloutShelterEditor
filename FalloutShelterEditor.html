@@ -5,7 +5,7 @@
 <script language="javascript" src="http://bitballoon.scdn4.secure.raxcdn.com/bundles/5a9944b4e3545d303fa7bc53ad8c2ed1d0aaf8a2.js"></script>
 </head>
 <body onload="fossdLoad();">
-    <h2>Fallout Shelter Save Editor v1.1 (updated Dec 13 2015)</h2>
+    <h2>Fallout Shelter Save Editor v1.1.0 (updated Dec 21 2015)</h2>
     <div style="float:left;width:600px;margin-left:10px;">
     <h3>Easy Edit</h3>
     <ul>
@@ -33,6 +33,14 @@
             
             <input type="checkbox" id="setReturnDwellers" checked>Return all returning dwellers to vault
             <br/>
+
+            <input type="checkbox" id="giveExplorersHealthPacks" checked>Give all exploring dwellers max Stimpacks and Radaways
+            <br/>
+
+            <input type="checkbox" id="setIncreaseExploreTime" checked>Fast forward 5 days for exploring dwellers
+            <ul>
+            	<li>5 days is the in-game max, after which dwellers automatically turn back. If exceeded, dwellers will not be attacked and will only find rare items!</li>
+            </ul>
             <br/>
         </li>
         <li>Dwellers
@@ -851,7 +859,6 @@ function setConfigSettings(){
     if (document.getElementById("setDwellerHappiness").checked == true){
         config["dwellerHappiness"] = parseInt(document.getElementById("dwellerHappiness").value);
     }
-
 }
 
 function resetForm(){
@@ -968,7 +975,7 @@ function encrypt(evt, fileName, jsonStr, processType) {
 
     if (processType == "full"){
         saveAs(blob, fileName + "-new");
-    } else if (processType == "sav") {
+    } else if (processType == "sv2") {
         saveAs(blob, fileName.replace('.txt', '.sv2').replace('.json', '.sv2'));
     } else {
         console.log("bad encrypt process type")
@@ -1293,6 +1300,31 @@ function modifyFile(data){
             if (explorer["returnTripDuration"] > 0) {
                 explorer["elapsedReturningTime"] = explorer["returnTripDuration"] - 25;
             }
+        }
+    }
+
+    if (document.getElementById("setIncreaseExploreTime").checked == true){
+        console.log('extending exploration time...')
+        for (var i = 0; i < data["vault"]["wasteland"]["teams"].length; i++){
+            var explorer = data["vault"]["wasteland"]["teams"][i];
+            if (explorer["elapsedTimeAliveExploring"] < 440000){
+            	explorer["elapsedTimeAliveExploring"] = 440000;
+            }      
+        }
+    }
+
+    if (document.getElementById("giveExplorersHealthPacks").checked == true){
+        console.log('packing health packs for explorers...');
+        for (var i = 0; i < data["vault"]["wasteland"]["teams"].length; i++){
+            var explorer = data["vault"]["wasteland"]["teams"][i];
+            for (var j=0; j<explorer["dwellers"].length; j++){
+            	for (var k=0; k<data["dwellers"]["dwellers"].length; k++){
+            		if (explorer["dwellers"][j] == data["dwellers"]["dwellers"][k]["serializeId"]){
+            			data["dwellers"]["dwellers"][k]["equipment"]["storage"]["resources"]["StimPack"] = 25;
+            			data["dwellers"]["dwellers"][k]["equipment"]["storage"]["resources"]["RadAway"] = 25;
+            		}
+            	}
+            }      
         }
     }
 
