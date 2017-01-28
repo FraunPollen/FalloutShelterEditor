@@ -374,6 +374,16 @@ function disablePetOptions(){
     } else {
         document.getElementById("petPowerValue9").disabled = true;
     }
+    if (document.getElementById("petPower10").checked == true){
+        document.getElementById("petPowerValue10").disabled = false;
+    } else {
+        document.getElementById("petPowerValue10").disabled = true;
+    }
+    if (document.getElementById("petPower11").checked == true){
+        document.getElementById("petPowerValue11").disabled = false;
+    } else {
+        document.getElementById("petPowerValue11").disabled = true;
+    }
     resetForm();
 }
 
@@ -1014,11 +1024,7 @@ function modifyFile(data){
             }
         }
 
-        if (data["dwellers"]["dwellers"].length <= config["maxDwellerCount"])
-        {
-            data["dwellerSpawner"]["dwellersWaiting"] = [];
-        }
-        else
+        if (data["dwellers"]["dwellers"].length > config["maxDwellerCount"])
         {
             for (var i = 0; i < waitingDwellersIds.length; i++)
             {
@@ -1036,6 +1042,7 @@ function modifyFile(data){
                 }
             }
         }
+        data["dwellerSpawner"]["dwellersWaiting"] = [];
         
         console.log('removing pending actors...');
         for (var i = 0; i < waitingActorsIds.length; i++)
