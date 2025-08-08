@@ -3,10 +3,11 @@ Changelog
 v2.0
 (planned) Support for time fixing
 (planned) Import/export config
+(planned) Boost dweller exploration time past 4 day in-game limit
 
 v1.1 (12/13/2015)
 - WastelandItemBoost pet not marked as percent
-- Replace all equipped weapons/outfits checked by default
-- Separate list for replacing equipped weapons/outfits
+- Replaced all equipped weapons/outfits checked by default
+- Separated list for replacing equipped weapons/outfits
 
 v1.0 (12/13/2015)
