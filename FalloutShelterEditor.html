@@ -1,0 +1,1268 @@
+<html>
+<head>
+<title>Fallout Shelter Save Editor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/json2/20150503/json2.js" language="javascript"></script>
+<script language="javascript" src="http://bitballoon.scdn4.secure.raxcdn.com/bundles/5a9944b4e3545d303fa7bc53ad8c2ed1d0aaf8a2.js"></script>
+</head>
+<body onload="fossdLoad();">
+    <h2>Fallout Shelter Save Editor v1.0 (updated Dec 2015)</h2>
+    <div style="float:left;width:600px;margin-left:10px;">
+    <h3>Easy Edit</h3>
+    <ul>
+        Imports sv2 to JSON, edits JSON, and exports to sv2</li>
+    </ul>
+    <form id="setConfig" style="float:left;margin-left:25px;padding:5px;border: 5px solid;width:500px;">
+        <ul>
+        <li>Vault
+            <br />
+            <input type="checkbox" id="discoverItems" checked disabled>Discover additional weapons and outfits
+            <ul>
+                <li>Required: weapons and outfits cannot be added to inventory if they have not been discovered</li>
+                <li>Will not remove weapons or outfits your vault has already discovered</li>
+            </ul>
+
+            <input type="checkbox" id="setMaxDwellers" onclick="disableVaultOptions();" checked>Set Max Dweller Count: </input><input id="maxDwellerCount" value = 500 style="width:75px;" type="number" min="0" step="1">
+            <ul>
+                <li>Will add pending dwellers to vault as long as doing so does not exceed this limit</li>
+                <li>Will not remove dwellers who are already in the vault</li>
+            </ul>
+            <input type="checkbox" id="abortPregnancies" checked>Abort pregnancies
+            <ul>
+                <li>Women will be permanently pregnant (and won't fight) if dweller count is 200+</li>
+            </ul>
+            
+            <input type="checkbox" id="setReturnDwellers" checked>Return all returning dwellers to vault
+            <br/>
+            <br/>
+        </li>
+        <li>Dwellers
+            <br />
+            <input type="checkbox" id="setMaxMrHandyHealth" onclick="disableDwellerOptions();" checked>Set Max Mr. Handy Health: </input><input id="maxMrHandyHealth" value = 1000000 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <ul>
+                <li>Will set and heal all Mr. Handys to the inputted health</li>
+            </ul>
+
+            <input type="checkbox" id="setMaxDwellerHealth" onclick="disableDwellerOptions();" checked>Set Max Dweller Health: </input><input id="maxDwellerHealth" value = 1000000 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <ul>
+                <li>Will set and heal all dwellers to the inputted health</li>
+            </ul>
+
+            <input type="checkbox" id="setDwellerRad" onclick="disableDwellerOptions();" checked>Set Dweller Radiation Level: </input><input id="dwellerRadLevel" value = 0 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br/>
+
+            <input type="checkbox" id="setDwellerHappiness" onclick="disableDwellerOptions();" checked>Set Dweller Happiness: </input><input id="dwellerHappiness" value = 100 style="width:75px;" type="number" min="0" max="100" step="1" onkeypress="resetForm();">
+            <br/>
+
+            <input type="checkbox" id="renameDwellers" checked>Rename dwellers to their ID numbers</input>
+            <ul>
+                <li>Old dweller names CANNOT be recovered if this is performed</li>
+            </ul>
+            <br/>
+
+            <input type="checkbox" id="setMaxStats" checked>Set all SPECIAL stats to 10</input>
+            <br/>
+            
+            <input type="checkbox" id="setDwellerLvl" checked>Set all dwellers to lvl 50</input>
+            <br/>
+            <br/>
+
+            <input type="checkbox" id="equipMirv" checked>Equip all dwellers with MIRV</input>
+            <ul>
+                <li>This will overwrite all equipped weapons with fatman MIRV</li>
+            </ul>
+
+            <input type="checkbox" id="setEquipPet" onclick="disableDwellerOptions();">Equip all dwellers with pet (choose one):</input>
+            <select id="petSpecies">
+                <option value="american_l">Dog: American</option>
+                <option value="blacklab_l">Dog: Black Labrador</option>
+                <option value="boxer_l">Dog: Boxer</option>
+                <option value="cattledog_l">Dog: Cattle Dog</option>
+                <option value="doberman_l">Dog: Doberman</option>
+                <option value="germanpointer_l">Dog: German Pointer</option>
+                <option value="germanshepherd_l">Dog: German Shepherd</option>
+                <option value="goldenret_l" selected>Dog: Golden Retriever</option>
+                <option value="husky_l">Dog: Husky</option>
+                <option value="poodle_l">Dog: Poodle</option>
+                <option value="rottweiller_l">Dog: RotWeiller</option>
+                <option value="scottishfold_l">Dog: Scottish Fold</option>
+                <option value="abyssinian_l">Cat: Abyssinian</option>
+                <option value="bombay_l">Cat: Bombay</option>
+                <option value="mainecoon_l">Cat: Mainecoon</option>
+                <option value="ocicat_l">Cat: Ocicat</option>
+                <option value="persian_l">Cat: Persian</option>
+                <option value="siamese_l">Cat: Siamese</option>
+                <option value="sphynx_l">Cat: Sphynx</option>
+            </select>
+            <ul>
+                <li>This will override the in-game max of 1-3 dwellers with a pet per room</li>
+                <input type="radio" name="petPower" id="petPower1" value="Resistance" onclick="disablePetOptions();" checked>Damage Resistance  </input>
+                <input id="petPowerValue1" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
+                <br/>
+                <input type="radio" name="petPower" id="petPower2" value="WastelandItemBoost" onclick="disablePetOptions();" >Wasteland Item Boost  </input>
+                <input id="petPowerValue2" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
+                <br/>
+                <input type="radio" name="petPower" id="petPower3" value="ObjectiveMultiplier" onclick="disablePetOptions();" >Objective Multiplier  </input>
+                <input id="petPowerValue3" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
+                <br/>
+                <input type="radio" name="petPower" id="petPower4" value="FasterWastelandReturnSpeed" onclick="disablePetOptions();" >Wasteland Return Speed  </input>
+                <input id="petPowerValue4" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
+                <br/>
+                <input type="radio" name="petPower" id="petPower5" value="HealingBoost" onclick="disablePetOptions();" >Healing Speed  </input>
+                <input id="petPowerValue5" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
+                <br/>
+                <input type="radio" name="petPower" id="petPower6" value="HappinessBoost" onclick="disablePetOptions();" >Happiness Boost  </input>
+                <input id="petPowerValue6" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
+                <br/>
+                <input type="radio" name="petPower" id="petPower7" value="WastelandCapsBoost" onclick="disablePetOptions();" >Wasteland Caps Boost  </input>
+                <input id="petPowerValue7" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
+                <br/>
+                <input type="radio" name="petPower" id="petPower8" value="RadHealingBoost" onclick="disablePetOptions();" >Radiation Healing Boost  </input>
+                <input id="petPowerValue8" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
+                <br/>
+                <input type="radio" name="petPower" id="petPower9" value="AddMaxHP" onclick="disablePetOptions();" >Add to Max HP  </input>
+                <input id="petPowerValue9" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
+                <br/>
+                <input type="radio" name="petPower" id="petPower10" value="XPBoost" onclick="disablePetOptions();" >XP Boost  </input>
+                <input id="petPowerValue10" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
+                <br/>
+                <input type="radio" name="petPower" id="petPower11" value="TrainingBoost" onclick="disablePetOptions();" >Training Time Reduction  </input>
+                <input id="petPowerValue11" min="0" max="100" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
+            </ul>
+            <br/>
+        </li>
+        <li>Inventory and Resources
+            <br />
+            <input type="checkbox" id="setEnergyCount" onclick="disableInventoryOptions();">Set Vault Energy: </input><input id="energyCount" value = 15000 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br />
+
+            <input type="checkbox" id="setFoodCount" onclick="disableInventoryOptions();">Set Vault Food: </input><input id="foodCount" value = 5000 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br />
+
+            <input type="checkbox" id="setWaterCount" onclick="disableInventoryOptions();">Set Vault Water: </input><input id="waterCount" value = 5000 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br />
+
+            <input type="checkbox" id="setRadawayCount" onclick="disableInventoryOptions();" checked>Set RadAway Count: </input><input id="radawayCount" value = 150 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br />
+
+            <input type="checkbox" id="setStimpackCount" onclick="disableInventoryOptions();" checked>Set Stimpack Count: </input><input id="stimpackCount" value = 150 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br />
+
+            <input type="checkbox" id="setCapsCount" onclick="disableInventoryOptions();" checked>Set Caps Count: </input><input id="capsCount" value = 500000 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <br />
+            <br/>
+            <input type="checkbox" id="setLunchboxCount" onclick="disableInventoryOptions();" checked>Set Number of Lunchboxes: </input><input id="lunchboxCount" value = 100 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <ul>
+                <li>Will set number of lunchboxes the vault has</li>
+            </ul>
+
+            <input type="checkbox" id="setMrHandyBoxCount" onclick="disableInventoryOptions();" checked>Set Number of Mr. Handy boxes: </input><input id="mrHandyBoxCount" value = 0 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <ul>
+                <li>Will set number of Mr. Handy boxes the vault has</li>
+            </ul>
+
+            <input type="checkbox" id="setPetCrateCount" onclick="disableInventoryOptions();" checked>Set Number of Pet Crates: </input><input id="petCrateCount" value = 0 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();">
+            <ul>
+                <li>Will set number of pet crates the vault has</li>
+            </ul>
+
+            <input type="checkbox" id="setRemoveBoxes" checked>Remove boxes not included above</input>
+            <br/>
+            <br/>
+
+            <input type="checkbox" id="giveInventory" onclick="disableInventoryOptions();" checked>Give </input><input id="inventoryCount" value = 10 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();"> of each of the following:
+            <ul>
+                <li>Outfits
+                    <br/>
+                    <input type="checkbox" id="removeOutfits" checked>Remove all equipped outfits if not in select list below</input>
+                    <ul>
+                        <li><input type="checkbox" id="giveStrength" value="MilitaryJumpsuit_Commander" checked>Give max strength outfit</input></li>
+                        <li><input type="checkbox" id="givePerception" value="UtilityJumpsuit_Heavy">Give max perception outfit</input></li>
+                        <li><input type="checkbox" id="giveEndurance" value="HazmatSuit_Heavy" checked>Give max endurance outfit</input></li>
+                        <li><input type="checkbox" id="giveCharisma" value="AllNightware_Lucky">Give max charisma outfit</input></li>
+                        <li><input type="checkbox" id="giveIntelligence" value="LabCoat_Expert">Give max intelligence outfit</input></li>
+                        <li><input type="checkbox" id="giveAgility" value="HandymanJumpsuit_Expert">Give max agility outfit</input></li>
+                        <li><input type="checkbox" id="giveLuck" value="FormalWear_Lucky">Give max luck outfit</input></li>                    
+                        <li><input type="checkbox" id="givePowerStrength" value="PowerArmor_MkVI" checked>Give X-01 Mk VI Power Armor (Strength)</input></li>
+                        <li><input type="checkbox" id="givePowerPerception" value="PowerArmor_T45f" checked>Give T-45f Power Armor (Perception)</input></li>
+                        <li><input type="checkbox" id="givePowerEndurance" value="PowerArmor_T60f" checked>Give T-60f Power Armor (Endurance)</input></li>
+                    </ul>
+                </li>
+                <li>Weapons:
+                    <br/>
+                    <input type="checkbox" id="removeWeapons" checked>Remove all equipped weapons if not in select list below</input>
+                    <ul>
+                        <li><input type="checkbox" id="giveMirv" value="Fatman_Mirv" checked>Give MIRV</input></li>
+                    </ul>
+                </li>
+            </ul>
+            <br/>
+        </li>
+        <li>Game Behavior
+            <br />
+            <input type="checkbox" id="setDeathClawChance" onclick="disableGameOptions();">Set Deathclaw occurance chance: </input><input id="deathClawChance" value = 0.05 style="width:75px;" type="number" min="0" max="1" step="0.01" onkeypress="resetForm();">
+            <br /> 
+            <input type="checkbox" id="setSimpleObjectives">Simple Resource Objectives only</input>
+            <br />   
+        </li>
+        </ul>
+        <b>Process File: </b>
+        <input type="button" id="validate" onclick="validateForm();" type="button" value="Validate entries"></input>
+        <label id="validationMsg"></label>
+        <br/>
+        <small>Upload your sv2 file: </small><input id="full_mod" name="full_file" type="file" accept=".sv2" disabled>
+    </form>       
+    </ul>
+</div>
+<div style="float:left;width:500px;margin-left:25px;">
+    <h3>Instructions for iPhone (using Easy Edit):</h3>
+    <ul>
+        <li>Save vault to iCloud on iPhone</li>
+        <li>Retrieve .sv2 file by opening Terminal and entering command:
+            <ul>
+                <li>
+                open ~/Library/Mobile\ Documents/iCloud~com~bethsoft~falloutshelter
+                </li>
+            </ul>
+        </li>
+        <li>Copy vault file to Downloads</li>
+        <li>With iCloud checked, delete the saved game from your phone
+            <ul>
+                <li>The local copy of the game on your phone will always overwrite what is in iCloud</li>
+            </ul>
+        </li>
+        <li>Fill out the desired options in the Easy Edit form on the left and click the validate button to make sure everything looks good. If all is OK, then load the .sv2 in Downloads.
+            <ul>
+                <li>This editor will leave the original file untouched so you can use it as a backup</li>
+            </ul>
+        </li>
+        <li>Copy the new file into the iCloud folder and remove the "-new" suffix once the file has uploaded. I advise against renaming the file.</li>
+        <ul>
+            <li>You should copy, not move, the new file to iCloud just in case something goes wrong</li>
+        </ul>
+        <li>Once the file has uploaded to iCloud, check off the iCloud next to the appropriate vault slot on your iPhone
+            <ul>
+                <li>You should see a status bar next to your file as it is uploaded to iCloud. If not, wait around 30 seconds.</li>
+                <li>If your save file starts with "Vault1", you should be checking off the first save slot, etc.</li>
+            </ul>
+        </li>
+        <li>The new file should load!
+            <ul>
+                <li>If checking off the iCloud checkbox doesn't load the file right away, try checking it off and on again a few times. This happens because the save file hasn't completely loaded to iCloud/your phone yet.</li>
+                <li>Failing to remove the "-new" suffix at the end of the file name will also cause the save file to not load on your phone.
+                </li>
+                <li>If the file does not load at all, there is an error in how the data was edited. Use your original save file instead.
+                </li>
+            </ul>
+        </li>  
+    </ul>
+</div>
+    
+<div style="float:left;width:500px;margin-left:25px;margin-top:25px;">
+<h3>Advanced</h3>
+<ul>
+    Manually decrypt save file for more customized edits or for exploratory purposes
+        <ul>
+            <li>WARNING: JSON syntax errors or unexpected changes to save file will either cause encryption to fail or FALLOUT SHELTER to reject your modified save file. Always keep a backup if performing manual decryptions or encryptions!</li>
+        </ul>
+    <br/>
+    <b>Decrypt sv2 (saves as JSON)</b>
+    <input id="sav_file" name="sav_file" type="file" accept=".sv2">
+    <ul>
+        <li>Export sv2 file to JSON for manual editing</li>
+    </ul>
+    <br/>
+    <b>Encrypt JSON (saves as sv2)</b>
+    <input id="json_file" name="json_file" type="file" accept="application/json">
+    <ul>
+        <li>Export json file to sv2 for upload to iCloud</li>
+    </ul>
+      
+</ul>
+</div>
+
+<div style="width:100%;float:left;">
+<br/>
+<br/>
+Written by /u/Fraun_Pollen, Vault 68
+<br/>
+Credit to u/Xeth137 for providing file decryptor/encryptor
+</div>
+</body>
+
+<script language="javascript">
+var key = [0xa7ca9f33,
+0x66d892c2,
+0xf0bef417,
+0x341ca971,
+0xb69ae9f7,
+0xbacccffc,
+0xf43c62d1,
+0xd7d021f9];
+
+var config = {};
+
+var iv = sjcl.codec.hex.toBits('7475383967656A693334307438397532');
+
+sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
+
+function disablePetOptions(){
+    if (document.getElementById("petPower1").checked == true){
+        document.getElementById("petPowerValue1").disabled = false;
+    } else {
+        document.getElementById("petPowerValue1").disabled = true;
+    }
+    if (document.getElementById("petPower2").checked == true){
+        document.getElementById("petPowerValue2").disabled = false;
+    } else {
+        document.getElementById("petPowerValue2").disabled = true;
+    }
+    if (document.getElementById("petPower3").checked == true){
+        document.getElementById("petPowerValue3").disabled = false;
+    } else {
+        document.getElementById("petPowerValue3").disabled = true;
+    }
+    if (document.getElementById("petPower4").checked == true){
+        document.getElementById("petPowerValue4").disabled = false;
+    } else {
+        document.getElementById("petPowerValue4").disabled = true;
+    }
+    if (document.getElementById("petPower5").checked == true){
+        document.getElementById("petPowerValue5").disabled = false;
+    } else {
+        document.getElementById("petPowerValue5").disabled = true;
+    }
+    if (document.getElementById("petPower6").checked == true){
+        document.getElementById("petPowerValue6").disabled = false;
+    } else {
+        document.getElementById("petPowerValue6").disabled = true;
+    }
+    if (document.getElementById("petPower7").checked == true){
+        document.getElementById("petPowerValue7").disabled = false;
+    } else {
+        document.getElementById("petPowerValue7").disabled = true;
+    }
+    if (document.getElementById("petPower8").checked == true){
+        document.getElementById("petPowerValue8").disabled = false;
+    } else {
+        document.getElementById("petPowerValue8").disabled = true;
+    }
+    if (document.getElementById("petPower9").checked == true){
+        document.getElementById("petPowerValue9").disabled = false;
+    } else {
+        document.getElementById("petPowerValue9").disabled = true;
+    }
+    resetForm();
+}
+
+function disableInventoryOptions(){
+    if (document.getElementById("giveInventory").checked == false)
+    {
+        document.getElementById("inventoryCount").disabled = true;
+
+        document.getElementById("giveStrength").disabled = true;
+        document.getElementById("givePerception").disabled = true;
+        document.getElementById("giveEndurance").disabled = true;
+        document.getElementById("giveCharisma").disabled = true;
+        document.getElementById("giveIntelligence").disabled = true;
+        document.getElementById("giveAgility").disabled = true;
+        document.getElementById("giveLuck").disabled = true;
+        document.getElementById("givePowerStrength").disabled = true;
+        document.getElementById("givePowerPerception").disabled = true;
+        document.getElementById("givePowerEndurance").disabled = true;
+        document.getElementById("giveMirv").disabled = true;
+        document.getElementById("removeOutfits").disabled = true;
+        document.getElementById("removeWeapons").disabled = true;
+    } else {
+        document.getElementById("inventoryCount").disabled = false;
+
+        document.getElementById("giveStrength").disabled = false;
+        document.getElementById("givePerception").disabled = false;
+        document.getElementById("giveEndurance").disabled = false;
+        document.getElementById("giveCharisma").disabled = false;
+        document.getElementById("giveIntelligence").disabled = false;
+        document.getElementById("giveAgility").disabled = false;
+        document.getElementById("giveLuck").disabled = false;
+        document.getElementById("givePowerStrength").disabled = false;
+        document.getElementById("givePowerPerception").disabled = false;
+        document.getElementById("givePowerEndurance").disabled = false;
+        document.getElementById("giveMirv").disabled = false;
+        document.getElementById("removeOutfits").disabled = false;
+        document.getElementById("removeWeapons").disabled = false;
+    }
+
+    if (document.getElementById("setLunchboxCount").checked == true){
+        document.getElementById("lunchboxCount").disabled = false;
+    } else {
+        document.getElementById("lunchboxCount").disabled = true;
+    }
+
+    if (document.getElementById("setMrHandyBoxCount").checked == true){
+        document.getElementById("mrHandyBoxCount").disabled = false;
+    } else {
+        document.getElementById("mrHandyBoxCount").disabled = true;
+    }
+
+    if (document.getElementById("setPetCrateCount").checked == true){
+        document.getElementById("petCrateCount").disabled = false;
+    } else {
+        document.getElementById("petCrateCount").disabled = true;
+    }
+
+    if (document.getElementById("setRadawayCount").checked == true){
+        document.getElementById("radawayCount").disabled = false;
+    } else {
+        document.getElementById("radawayCount").disabled = true;
+    }
+
+    if (document.getElementById("setStimpackCount").checked == true){
+        document.getElementById("stimpackCount").disabled = false;
+    } else {
+        document.getElementById("stimpackCount").disabled = true;
+    }
+
+    if (document.getElementById("setCapsCount").checked == true){
+        document.getElementById("capsCount").disabled = false;
+    } else {
+        document.getElementById("capsCount").disabled = true;
+    }
+    
+    if (document.getElementById("setEnergyCount").checked == true){
+        document.getElementById("energyCount").disabled = false;
+    } else {
+        document.getElementById("energyCount").disabled = true;
+    }
+    
+    if (document.getElementById("setFoodCount").checked == true){
+        document.getElementById("foodCount").disabled = false;
+    } else {
+        document.getElementById("foodCount").disabled = true;
+    }
+    
+    if (document.getElementById("setWaterCount").checked == true){
+        document.getElementById("waterCount").disabled = false;
+    } else {
+        document.getElementById("waterCount").disabled = true;
+    }
+    resetForm();
+}
+
+function disableDwellerOptions(){
+    if (document.getElementById("setMaxDwellerHealth").checked == true){
+        document.getElementById("maxDwellerHealth").disabled = false;
+    } else {
+        document.getElementById("maxDwellerHealth").disabled = true;
+    }
+
+    if (document.getElementById("setDwellerRad").checked == true){
+        document.getElementById("dwellerRadLevel").disabled = false;
+    } else {
+        document.getElementById("dwellerRadLevel").disabled = true;
+    }    
+
+    if (document.getElementById("setDwellerHappiness").checked == true){
+        document.getElementById("dwellerHappiness").disabled = false;
+    } else {
+        document.getElementById("dwellerHappiness").disabled = true;
+    } 
+
+    if (document.getElementById("setMaxMrHandyHealth").checked == true){
+        document.getElementById("maxMrHandyHealth").disabled = false;
+    } else {
+        document.getElementById("maxMrHandyHealth").disabled = true;
+    }
+
+    if (document.getElementById("setEquipPet").checked == true){
+        document.getElementById("petSpecies").disabled = false;
+        document.getElementById("petPower1").checked = true;
+        document.getElementById("petPower1").disabled = false;
+        document.getElementById("petPower2").checked = false;
+        document.getElementById("petPower2").disabled = false;
+        document.getElementById("petPower3").checked = false;
+        document.getElementById("petPower3").disabled = false;
+        document.getElementById("petPower4").checked = false;
+        document.getElementById("petPower4").disabled = false;
+        document.getElementById("petPower5").checked = false;
+        document.getElementById("petPower5").disabled = false;
+        document.getElementById("petPower6").checked = false;
+        document.getElementById("petPower6").disabled = false;
+        document.getElementById("petPower7").checked = false;
+        document.getElementById("petPower7").disabled = false;
+        document.getElementById("petPower8").checked = false;
+        document.getElementById("petPower8").disabled = false;
+        document.getElementById("petPower9").checked = false;
+        document.getElementById("petPower9").disabled = false;
+        document.getElementById("petPower10").checked = false;
+        document.getElementById("petPower10").disabled = false;
+        document.getElementById("petPower11").checked = false;
+        document.getElementById("petPower11").disabled = false;
+    } else {
+        document.getElementById("petSpecies").disabled = true;
+        document.getElementById("petPower1").checked = false;
+        document.getElementById("petPower1").disabled = true;
+        document.getElementById("petPower2").checked = false;
+        document.getElementById("petPower2").disabled = true;
+        document.getElementById("petPower3").checked = false;
+        document.getElementById("petPower3").disabled = true;
+        document.getElementById("petPower4").checked = false;
+        document.getElementById("petPower4").disabled = true;
+        document.getElementById("petPower5").checked = false;
+        document.getElementById("petPower5").disabled = true;
+        document.getElementById("petPower6").checked = false;
+        document.getElementById("petPower6").disabled = true;
+        document.getElementById("petPower7").checked = false;
+        document.getElementById("petPower7").disabled = true;
+        document.getElementById("petPower8").checked = false;
+        document.getElementById("petPower8").disabled = true;
+        document.getElementById("petPower9").checked = false;
+        document.getElementById("petPower9").disabled = true;
+        document.getElementById("petPower10").checked = false;
+        document.getElementById("petPower10").disabled = true;
+        document.getElementById("petPower11").checked = false;
+        document.getElementById("petPower11").disabled = true; 
+    }
+    disablePetOptions();
+    resetForm();
+}
+
+function disableVaultOptions(){
+    if (document.getElementById("setMaxDwellers").checked == true){
+        document.getElementById("maxDwellerCount").disabled = false;
+    } else {
+        document.getElementById("maxDwellerCount").disabled = true;
+    }
+    resetForm();
+}
+
+function disableGameOptions(){
+    if (document.getElementById("setDeathClawChance").checked == true){
+        document.getElementById("deathClawChance").disabled = false;
+    } else {
+        document.getElementById("deathClawChance").disabled = true;
+    }
+    resetForm();
+}
+
+function validateForm(){
+    var valid = true;
+    if (document.getElementById("giveInventory").checked == false)
+    {
+        valid = valid && document.getElementById("inventoryCount").checkValidity();
+    }
+    if (document.getElementById("setLunchboxCount").checked == true){
+        valid = valid && document.getElementById("lunchboxCount").checkValidity();
+    }
+    if (document.getElementById("setMrHandyBoxCount").checked == true){
+        valid = valid && document.getElementById("mrHandyBoxCount").checkValidity();
+    }
+    if (document.getElementById("setPetCrateCount").checked == true){
+        valid = valid && document.getElementById("petCrateCount").checkValidity();
+    }
+    if (document.getElementById("setRadawayCount").checked == true){
+        valid = valid && document.getElementById("radawayCount").checkValidity();
+    }
+    if (document.getElementById("setStimpackCount").checked == true){
+        valid = valid && document.getElementById("stimpackCount").checkValidity();
+    }
+    if (document.getElementById("setCapsCount").checked == true){
+        valid = valid && document.getElementById("capsCount").checkValidity();
+    }
+    if (document.getElementById("setWaterCount").checked == true){
+        valid = valid && document.getElementById("waterCount").checkValidity();
+    }
+    if (document.getElementById("setFoodCount").checked == true){
+        valid = valid && document.getElementById("foodCount").checkValidity();
+    }
+    if (document.getElementById("setEnergyCount").checked == true){
+        valid = valid && document.getElementById("energyCount").checkValidity();
+    }
+    if (document.getElementById("setMaxDwellerHealth").checked == true){
+        valid = valid && document.getElementById("maxDwellerHealth").checkValidity();
+    }
+    if (document.getElementById("setMaxMrHandyHealth").checked == true){
+        valid = valid && document.getElementById("maxMrHandyHealth").checkValidity();
+    }
+    if (document.getElementById("setMaxDwellers").checked == true){
+        valid = valid && document.getElementById("maxDwellerCount").checkValidity();
+    }
+    if (document.getElementById("setDeathClawChance").checked == true){
+        valid = valid && document.getElementById("deathClawChance").checkValidity();
+    }
+    if (document.getElementById("setEquipPet").checked == true){
+        if (document.getElementById("petPower1").checked == true){
+            valid = valid && document.getElementById("petPowerValue1").checkValidity();
+        }
+        if (document.getElementById("petPower2").checked == true){
+            valid = valid && document.getElementById("petPowerValue2").checkValidity();
+        }
+        if (document.getElementById("petPower3").checked == true){
+            valid = valid && document.getElementById("petPowerValue3").checkValidity();
+        }
+        if (document.getElementById("petPower4").checked == true){
+            valid = valid && document.getElementById("petPowerValue4").checkValidity();
+        }
+        if (document.getElementById("petPower5").checked == true){
+            valid = valid && document.getElementById("petPowerValue5").checkValidity();
+        }
+        if (document.getElementById("petPower6").checked == true){
+            valid = valid && document.getElementById("petPowerValue6").checkValidity();
+        }
+        if (document.getElementById("petPower7").checked == true){
+            valid = valid && document.getElementById("petPowerValue7").checkValidity();
+        }
+        if (document.getElementById("petPower8").checked == true){
+            valid = valid && document.getElementById("petPowerValue8").checkValidity();
+        }
+        if (document.getElementById("petPower9").checked == true){
+            valid = valid && document.getElementById("petPowerValue9").checkValidity();
+        }
+        if (document.getElementById("petPower10").checked == true){
+            valid = valid && document.getElementById("petPowerValue10").checkValidity();
+        }
+        if (document.getElementById("petPower11").checked == true){
+            valid = valid && document.getElementById("petPowerValue11").checkValidity();
+        }
+    }
+    if (document.getElementById("setDwellerRad").checked == true){
+        valid = valid && document.getElementById("dwellerRadLevel").checkValidity();
+    }
+    if (document.getElementById("setDwellerHappiness").checked == true){
+        valid = valid && document.getElementById("dwellerHappiness").checkValidity();
+    }
+    
+    if (valid == false){
+        document.getElementById("full_mod").disabled = true;
+        document.getElementById("validationMsg").innerHTML = "There are errors in the selected options";
+    } else {
+        document.getElementById("full_mod").disabled = false;
+        document.getElementById("validationMsg").innerHTML = "Looks good: you are free to upload file";
+        setConfigSettings();
+    }
+}
+
+function setConfigSettings(){
+    if (document.getElementById("giveInventory").checked == true)
+    {
+        config["inventoryCount"] = document.getElementById("inventoryCount").value;
+        config["inventoryOutfitIds"] = [];
+        if (document.getElementById("giveStrength").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("giveStrength").value);
+        }
+        if (document.getElementById("givePerception").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("givePerception").value);
+        }
+        if (document.getElementById("giveEndurance").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("giveEndurance").value);
+        }
+        if (document.getElementById("giveCharisma").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("giveCharisma").value);
+        }
+        if (document.getElementById("giveIntelligence").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("giveIntelligence").value);
+        }
+        if (document.getElementById("giveAgility").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("giveAgility").value);
+        }
+        if (document.getElementById("giveLuck").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("giveLuck").value);
+        }
+        if (document.getElementById("givePowerStrength").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("givePowerStrength").value);
+        }
+        if (document.getElementById("givePowerPerception").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("givePowerPerception").value);
+        }
+        if (document.getElementById("givePowerEndurance").checked == true){
+            config["inventoryOutfitIds"].push(document.getElementById("givePowerEndurance").value);
+        }
+        config["inventoryWeaponIds"] = [];
+        if (document.getElementById("giveMirv").checked == true){
+            config["inventoryWeaponIds"].push(document.getElementById("giveMirv").value);
+        }
+    }
+    if (document.getElementById("setLunchboxCount").checked == true){
+        config["lunchboxCount"] = parseInt(document.getElementById("lunchboxCount").value);
+    }
+    if (document.getElementById("setMrHandyBoxCount").checked == true){
+        config["mrHandyBoxCount"] = parseInt(document.getElementById("mrHandyBoxCount").value);
+    }
+    if (document.getElementById("setPetCrateCount").checked == true){
+        config["petCrateCount"] = parseInt(document.getElementById("petCrateCount").value);
+    }
+    if (document.getElementById("setRadawayCount").checked == true){
+        config["radawayCount"] = parseInt(document.getElementById("radawayCount").value);
+    }
+    if (document.getElementById("setStimpackCount").checked == true){
+        config["stimpackCount"] = parseInt(document.getElementById("stimpackCount").value);
+    }
+    if (document.getElementById("setEnergyCount").checked == true){
+        config["energyCount"] = parseInt(document.getElementById("energyCount").value);
+    }
+    if (document.getElementById("setWaterCount").checked == true){
+        config["waterCount"] = parseInt(document.getElementById("waterCount").value);
+    }
+    if (document.getElementById("setFoodCount").checked == true){
+        config["foodCount"] = parseInt(document.getElementById("foodCount").value);
+    }
+    if (document.getElementById("setCapsCount").checked == true){
+        config["capsCount"] = parseInt(document.getElementById("capsCount").value);
+    }
+    if (document.getElementById("setMaxDwellerHealth").checked == true){
+        config["maxDwellerHealth"] = parseInt(document.getElementById("maxDwellerHealth").value);
+    }
+    if (document.getElementById("setMaxMrHandyHealth").checked == true){
+        config["maxMrHandyHealth"] = parseInt(document.getElementById("maxMrHandyHealth").value);
+    }
+    if (document.getElementById("setMaxDwellers").checked == true){
+        config["maxDwellerCount"] = parseInt(document.getElementById("maxDwellerCount").value);
+    }
+    if (document.getElementById("setDeathClawChance").checked == true){
+        config["deathClawChance"] = parseFloat(document.getElementById("deathClawChance").value);
+    }
+    if(document.getElementById("setEquipPet").checked == true){
+        var petPower = "";
+        var petPowerValue = "";
+        config["petSpecies"] = document.getElementById("petSpecies").value;
+        if (document.getElementById("petPower1").checked == true){
+            petPower = document.getElementById("petPower1").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue1").value);
+        } else if (document.getElementById("petPower2").checked == true){
+            petPower = document.getElementById("petPower2").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue2").value);
+        } else if (document.getElementById("petPower3").checked == true){
+            petPower = document.getElementById("petPower3").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue3").value);
+        } else if (document.getElementById("petPower4").checked == true){
+            petPower = document.getElementById("petPower4").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue4").value);
+        } else if (document.getElementById("petPower5").checked == true){
+            petPower = document.getElementById("petPower5").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue5").value);
+        } else if (document.getElementById("petPower6").checked == true){
+            petPower = document.getElementById("petPower6").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue6").value);
+        } else if (document.getElementById("petPower7").checked == true){
+            petPower = document.getElementById("petPower7").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue7").value);
+        } else if (document.getElementById("petPower8").checked == true){
+            petPower = document.getElementById("petPower8").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue8").value);
+        } else if (document.getElementById("petPower9").checked == true){
+            petPower = document.getElementById("petPower9").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue9").value);
+        } else if (document.getElementById("petPower10").checked == true){
+            petPower = document.getElementById("petPower10").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue10").value);
+        } else if (document.getElementById("petPower11").checked == true){
+            petPower = document.getElementById("petPower11").value;
+            parseInt(petPowerValue = document.getElementById("petPowerValue11").value);
+        } else {
+            config["petSpecies"] = "";
+        }
+        config["petPower"] = petPower;
+        config["petPowerValue"] = petPowerValue;
+    }
+    if (document.getElementById("setDwellerRad").checked == true){
+        config["dwellerRadLevel"] = parseInt(document.getElementById("dwellerRadLevel").value);
+    }
+    if (document.getElementById("setDwellerHappiness").checked == true){
+        config["dwellerHappiness"] = parseInt(document.getElementById("dwellerHappiness").value);
+    }
+
+}
+
+function resetForm(){
+    document.getElementById("full_mod").disabled = true;
+    document.getElementById("validationMsg").innerHTML = "<<< Validate form before continuing.";
+}
+
+function handleFileSelect(evt) {
+    try {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var f = evt.target.files[0];
+        var fileName = f.name;
+
+        if (f.size > 10000000) {
+            throw ('File exceeds maximum size of 10MB');
+        }
+
+        if (f) {
+            var reader = new FileReader();
+
+            if (evt.target.id == 'full_mod') {
+                reader.onload = function (evt2) {
+                    try {
+                        decrypt(evt2, fileName, reader.result, "full");
+                    } catch (e) {
+                        alert("Error: " + e)
+                    }
+                }
+                reader.readAsText(f);
+            } else if (evt.target.id == 'sav_file') {
+                reader.onload = function (evt2) {
+                    try {
+                        decrypt(evt2, fileName, reader.result, "json");
+                    } catch (e) {
+                        alert("Error: " + e)
+                    }
+                }
+                reader.readAsText(f);
+            } else if (evt.target.id == 'json_file'){
+                reader.onload = function (evt2) {
+                    try {
+                        encrypt(evt2, fileName, reader.result, "sv2");
+                    } catch (e) {
+                        alert("Error: " + e)
+                    }
+                }
+                reader.readAsText(f);
+            }
+        } else {
+            console.log("?")
+        }
+    } catch (e) {
+        alert("Error: " + e)
+    } finally {
+        evt.target.value = null;
+    }
+
+}
+
+function decrypt(evt, fileName, base64Str, processType) {
+    var cipherBits = sjcl.codec.base64.toBits(base64Str);
+    var prp = new sjcl.cipher.aes(key);
+    var plainBits = sjcl.mode.cbc.decrypt(prp, cipherBits, iv);
+    var jsonStr = sjcl.codec.utf8String.fromBits(plainBits);
+
+   try {
+        JSON.parse(jsonStr);
+    } catch (e) {
+        throw ('Decrypted file does not contain valid JSON: ' + e);
+    }
+
+    var data = JSON.parse(jsonStr);
+
+    if (processType == "full") {
+	    //modify save file
+	    data = modifyFile(data);
+	}
+
+    //save and encrypt file
+    var exportJSON = JSON.stringify(data, null, 2);
+    
+    console.log("exporting save...")
+    if (processType == "full") {
+        encrypt(evt, fileName, exportJSON, "full")
+    } else if (processType == "json") {
+        var blob = new Blob([exportJSON], {
+        type: 'application/json'
+        });
+        saveAs(blob, fileName.replace(".sv2",".json"));
+    } else {
+        console.log("bad decrypt process type")
+    }
+}
+
+function encrypt(evt, fileName, jsonStr, processType) {
+    try {
+        JSON.parse(jsonStr);
+    } catch (e) {
+        throw ('File does not contain valid JSON: ' + e);
+    }
+
+    var compactJsonStr = JSON.stringify(JSON.parse(jsonStr));
+
+    var plainBits = sjcl.codec.utf8String.toBits(compactJsonStr);
+    var prp = new sjcl.cipher.aes(key);
+    var cipherBits = sjcl.mode.cbc.encrypt(prp, plainBits, iv);
+    var base64Str = sjcl.codec.base64.fromBits(cipherBits);
+
+    var blob = new Blob([base64Str], {
+        type: 'text/plain'
+    });
+
+    if (processType == "full"){
+        saveAs(blob, fileName + "-new");
+    } else if (processType == "sav") {
+        saveAs(blob, fileName.replace('.txt', '.sv2').replace('.json', '.sv2'));
+    } else {
+        console.log("bad encrypt process type")
+    }
+}
+
+function fossdLoad() {
+    try {
+        if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+            throw ('Your browser does not support HTML5 File APIs');
+        }
+        if (!new Blob) {
+            throw ('Your browser does not support HTML5 Blob type');
+        }
+        document.getElementById('full_mod').addEventListener('change', handleFileSelect, false);
+        document.getElementById('sav_file').addEventListener('change', handleFileSelect, false);
+        document.getElementById('json_file').addEventListener('change', handleFileSelect, false);
+    } catch (e) {
+        alert("Error: " + e)
+    }
+}
+
+function modifyFile(data){
+
+    if (document.getElementById("setMaxDwellers").checked == true){
+        console.log('removing pending dwellers...');
+        var waitingDwellersIds = [];
+        var waitingActorsIds = [];
+        for (var i = 0; i < data["dwellerSpawner"]["dwellersWaiting"].length;i++)
+        {
+            if (data["dwellerSpawner"]["dwellersWaiting"][i]["charType"] == "Dweller")
+            {
+                waitingDwellersIds.push(data["dwellerSpawner"]["dwellersWaiting"][i]["dwellerId"]);
+            } else {
+                waitingActorsIds.push(data["dwellerSpawner"]["dwellersWaiting"][i]["serializeId"]);
+            }
+        }
+
+        if (data["dwellers"]["dwellers"].length <= config["maxDwellerCount"])
+        {
+            data["dwellerSpawner"]["dwellersWaiting"] = [];
+        }
+        else
+        {
+            for (var i = 0; i < waitingDwellersIds.length; i++)
+            {
+                for (var j = 0; j < data["dwellers"]["dwellers"].length; j++)
+                {  
+                    if (data["dwellers"]["dwellers"][j]["serializeId"] == waitingDwellersIds[i])
+                    {
+                        data["dwellers"]["dwellers"].splice(j,1) 
+                        break;
+                    }
+                }
+                if (data["dwellers"]["dwellers"].length<= config["maxDwellerCount"])
+                {
+                    break;
+                }
+            }
+        }
+        
+        console.log('removing pending actors...');
+        for (var i = 0; i < waitingActorsIds.length; i++)
+        {
+            for (var j = 0; j < data["dwellers"]["actors"].length; j++)
+            {
+                if (data["dwellers"]["actors"][j]["serializeId"] == waitingActorsIds[i])
+                {
+                    data["dwellers"]["actors"].splice(j,1);
+                    break;
+                }
+            }
+
+        }
+    }
+
+    for (var i = 0;i < data["dwellers"]["dwellers"].length; i++){
+        var dweller = data["dwellers"]["dwellers"][i];
+
+        if (document.getElementById("renameDwellers").checked == true){
+            // adjust dweller names
+            console.log("changed dweller names...");
+            var str = ""+dweller["serializeId"]
+            var pad = "000"
+            dweller["name"] = "d" + pad.substring(0, pad.length - str.length) + str;
+            dweller["lastName"] = "vault" + data["vault"]["VaultName"];         
+        }
+        
+        if (document.getElementById("removeOutfits").checked == true){
+            // remove illegal outfits
+            console.log("removed illegal outfits...");
+            var legalOutfit = false;
+            for (var j = 0; j < config["inventoryOutfitIds"].length; j++){
+                if (dweller["equipedOutfit"]["id"] == config["inventoryOutfitIds"][j]){
+                    legalOutfit = true;
+                    break;
+                }
+            }
+            if (legalOutfit == false){
+                dweller["equipedOutfit"]["id"] = "jumpsuit";
+            }
+        }
+
+        if (document.getElementById("removeWeapons").checked == true){
+            // remove illegal weapons
+            console.log("removed illegal weapons...");
+            var legalWeapon = false;
+            for (var j = 0; j < config["inventoryOutfitIds"].length; j++){
+                if (dweller["equipedWeapon"]["id"] == config["inventoryWeaponIds"][j]){
+                    legalWeapon = true;
+                    break;
+                }
+            }
+            if (legalWeapon == false){
+                dweller["equipedWeapon"]["id"] = "fist";
+            }
+        }
+        
+        if(document.getElementById("equipMirv").checked == true){
+            // replace all weapons
+            console.log("replaced weapons...");
+            dweller["equipedWeapon"]["id"] = "Fatman_Mirv"
+        }
+        
+        if(document.getElementById("setEquipPet").checked == true){
+            // add pets
+            console.log("added pets...");
+            dweller["equippedPet"] = {
+                "id": config["petSpecies"],
+                "type": "Pet",
+                "hasBeenAssigned": false,
+                "hasRandonWeaponBeenAssigned": false,
+                "extraData": {
+                    "uniqueName": config["petPower"] + "-" + config["petPowerValue"],
+                    "bonus": config["petPower"],
+                    "bonusValue": config["petPowerValue"]
+                }
+            } 
+        }
+
+        if (document.getElementById("setMaxDwellerHealth").checked==true){
+            console.log("set dweller health...");
+            dweller["health"]["healthValue"] = config["maxDwellerHealth"];
+            dweller["health"]["maxHealth"] = config["maxDwellerHealth"];
+        }
+
+        if(document.getElementById("setDwellerRad").checked==true){
+            console.log("set dweller rad...");
+            dweller["health"]["radiationValue"] = config["dwellerRadLevel"];
+        }
+        
+        if (document.getElementById("setDwellerLvl").checked==true){
+            // adjust level and xp
+            console.log("set dweller xp...");
+            dweller["health"]["lastLevelUpdated"] = 50;
+            dweller["experience"]["experienceValue"] = 1;
+            dweller["experience"]["currentLevel"] = 50;
+            dweller["experience"]["needLvUp"] = false;
+        }
+
+        if (document.getElementById("setDwellerHappiness").checked == true){
+            console.log("set dweller happiness...");
+            dweller["happiness"]["happinessValue"] = config["dwellerHappiness"];
+        }
+        
+        if (document.getElementById("setMaxStats").checked == true){
+            console.log("set dweller SPECIAL...");
+            for (var j = 1;j < 8; j++){
+                dweller["stats"]["stats"][j]["value"] = 10;
+                dweller["stats"]["stats"][j]["exp"] = 594000;
+            }
+        }        
+
+        if (document.getElementById("abortPregnancies").checked == true){
+            // fix pregnancies
+            console.log("fixed dweller pregnancies...");
+            dweller["pregnant"] = false;
+            dweller["babyReady"] = false;
+        } 
+    }
+
+    if (document.getElementById("discoverItems").checked == true){
+        console.log("unlocking weapons and outfits...");
+        var weaponsList = [ "O24", "O19", "O4", "O0", "O21", "O2", "O99", "O94", "O81", "O96", "O76", "O124", "O79", "O119", "O121", "O62", "O57", "O130", "O59", "O125", "O127", "O67", "O22", "O20", "O3", "O1", "O97", "O95", "O80", "O77", "O122", "O120", "O60", "O58", "O128", "O64", "O126", "O18", "O69", "O13", "O66", "O136", "O15", "O65", "O131", "O16", "O133", "O14", "O141", "O135", "O137", "O104", "O132", "O139", "O100", "O140", "O105", "O138", "O73", "O102", "O70", "O31", "O74", "O26", "O72", "O118", "O29", "O113", "O30", "O115", "O44", "O39", "O41", "O56", "O42", "O51", "O110", "O43", "O106", "O23", "O5", "O98", "O78", "O123", "O61", "O129", "O68", "O17", "O134", "O63", "O142", "O101", "O103", "O71", "O75", "O28", "O116", "O27", "O114", "O117", "O53", "O40", "O54", "O10", "O111", "O52", "O108", "O55", "O6", "O11", "O87", "O107", "O82", "O9", "O109", "O7", "O84", "O93", "O8", "O85", "O88", "O48", "O83", "O89", "O45", "O86", "O91", "O37", "O49", "O90", "O32", "O47", "O92", "O33", "O46", "O35", "O50", "O34", "O36"];
+        for (var i=0;i<weaponsList.length;i++){
+            if (!(weaponsList[i] in data["survivalW"]["weapons"]))
+            {
+                data["survivalW"]["weapons"].push(weaponsList[i])
+            }
+        }
+        var outfitList = ["O103", "O106", "O111", "O13", "O2", "O33", "O37", "O41", "O49", "O55", "O6", "O78", "O81", "O84", "O89", "O95", "O100", "O101", "O105", "O108", "O110", "O112", "O113", "O117", "O15", "O16", "O30", "O31", "O34", "O36", "O38", "O4", "O43", "O47", "O48", "O50", "O52", "O54", "O57", "O59", "O61", "O76", "O77", "O79", "O8", "O83", "O86", "O9", "O91", "O92", "O93", "O96", "O97", "O98", "O64", "O63", "O65", "O67", "O72", "O68", "O70", "O73", "O1", "O10", "O102", "O104", "O107", "O109", "O11", "O12", "O14", "O27", "O3", "O32", "O35", "O39", "O42", "O51", "O53", "O56", "O66", "O69", "O7", "O71", "O74", "O80", "O82", "O85", "O87", "O90", "O94", "O75"]
+        for (var i=0;i<outfitList.length;i++){
+            if (!(outfitList[i] in data["survivalW"]["outfits"]))
+            {
+                data["survivalW"]["outfits"].push(outfitList[i])
+            }
+        }
+        var petList = ["O10","O17", "O18", "O2", "O23", "O26", "O27", "O35", "O42", "O43", "O48", "O5", "O51", "O52", "O53", "O58", "O63", "O64", "O65", "O67"]
+        for (var i=0;i<petList.length;i++){
+            if (!(petList[i] in data["survivalW"]["pets"]))
+            {
+                data["survivalW"]["outfits"].push(petList[i])
+            }
+        }
+        var breedList = ["O10", "O11", "O0", "O12", "O1", "O13", "O2", "O3", "O4", "O5", "O6", "O7", "O14", "O15", "O16", "O8", "O9", "O17", "O18", "O19"]
+        for (var i=0;i<breedList.length;i++){
+            if (!(breedList[i] in data["survivalW"]["breeds"]))
+            {
+                data["survivalW"]["outfits"].push(breedList[i])
+            }
+        }
+    }
+    
+    var boxCount = 0;
+    var totalBoxes = 0;
+    var addBoxes = 0;
+    if (document.getElementById("setRemoveBoxes").checked == true){
+        console.log("removed old boxes...");
+        data["vault"]["LunchBoxesByType"] = []
+    }
+    if (document.getElementById("setLunchboxCount").checked == true){
+        console.log("added lunchboxes...");
+        boxCount = 0
+        for (var i=0;i<data["vault"]["LunchBoxesByType"].length;i++){
+            if (data["vault"]["LunchBoxesByType"] == 0){
+                boxCount += 1
+            }
+        }
+        totalBoxes += boxCount;
+        addBoxes = config["lunchboxCount"] - boxCount;
+        if (addBoxes > 0){
+            for (var i = 0;i < addBoxes;i++){
+                // add lunch boxes
+                data["vault"]["LunchBoxesByType"].push(0);
+            }
+        }
+        data["vault"]["storage"]["resources"]["Lunchbox"] = config["lunchboxCount"];
+        data["vault"]["storage"]["resources"]["Lunchbox"] = config["lunchboxCount"]; 
+    }
+    if (document.getElementById("setMrHandyBoxCount").checked == true){
+        console.log("added mr handy boxes...");
+        boxCount = 0
+        for (var i=0;i<data["vault"]["LunchBoxesByType"].length;i++){
+            if (data["vault"]["LunchBoxesByType"] == 1){
+                boxCount += 1
+            }
+        }
+        totalBoxes += boxCount;
+        addBoxes = config["mrHandyBoxCount"] - boxCount;
+        if (addBoxes > 0){
+            for (var i = 0;i < addBoxes;i++){
+                // add lunch boxes
+                data["vault"]["LunchBoxesByType"].push(1);
+            }
+        }
+        data["vault"]["storage"]["resources"]["MrHandy"] = config["mrHandyBoxCount"];
+        data["vault"]["storage"]["resources"]["MrHandy"] = config["mrHandyBoxCount"];
+    }
+    if (document.getElementById("setPetCrateCount").checked == true){
+        console.log("added pet crates...");
+        boxCount = 0
+        for (var i=0;i<data["vault"]["LunchBoxesByType"].length;i++){
+            if (data["vault"]["LunchBoxesByType"] == 2){
+                boxCount += 1
+            }
+        }
+        totalBoxes += boxCount;
+        addBoxes = config["petCrateCount"] - boxCount;
+        if (addBoxes > 0){
+            for (var i = 0;i < addBoxes;i++){
+                // add lunch boxes
+                data["vault"]["LunchBoxesByType"].push(2);
+            }
+        }
+        data["vault"]["storage"]["resources"]["PetCarrier"] = config["petCrateCount"];
+        data["vault"]["storage"]["resources"]["PetCarrier"] = config["petCrateCount"];
+    }
+    data["vault"]["LunchBoxesCount"] = data["vault"]["LunchBoxesByType"].length;
+
+    if (document.getElementById("giveInventory").checked == true){
+        console.log('updating inventory...')
+        var itemCount = 0;
+        var itemDiff = 0;
+
+        //add outfits
+        for (var i = 0; i < config["inventoryOutfitIds"].length; i++){
+            itemCount = 0;
+            for (var j = 0; j < data["vault"]["inventory"]["items"].length;j++){
+                if (data["vault"]["inventory"]["items"][j]["id"] == config["inventoryOutfitIds"][i]){
+                    itemCount += 1;
+                }
+            }
+            itemDiff = config["inventoryCount"] - itemCount;
+            if (itemDiff > 0){
+                for (var j = 0; j < itemDiff;j++){
+                    data["vault"]["inventory"]["items"].push({"id": config["inventoryOutfitIds"][i], "type": "Outfit", "hasBeenAssigned": false, "hasRandomWeaponBeenAssigned": false});
+                }
+            }
+        }
+        
+        //add weapons
+        for (var i = 0; i < config["inventoryWeaponIds"].length; i++){
+            itemCount = 0;
+            for (var j = 0; j < data["vault"]["inventory"]["items"].length;j++){
+                if (data["vault"]["inventory"]["items"][j]["id"] == config["inventoryWeaponIds"][i]){
+                    itemCount += 1;
+                }
+            }
+            itemDiff = config["inventoryCount"] - itemCount; 
+            if (itemDiff > 0){
+                for (var j = 0; j < itemDiff;j++){
+                    data["vault"]["inventory"]["items"].push({"id": config["inventoryWeaponIds"][i], "type": "Weapon", "hasBeenAssigned": false, "hasRandomWeaponBeenAssigned": false});
+                }
+            }
+        }
+    }
+
+    if (document.getElementById("setReturnDwellers").checked == true){
+        console.log('recalling returning explorers...')
+        for (var i = 0; i < data["vault"]["wasteland"]["teams"].length; i++){
+            var explorer = data["vault"]["wasteland"]["teams"][i];
+            if (explorer["returnTripDuration"] > 0) {
+                explorer["elapsedReturningTime"] = explorer["returnTripDuration"] - 25;
+            }
+        }
+    }
+
+    if (document.getElementById("setMaxMrHandyHealth").checked == true){
+        console.log('updating mr. handy health...')
+        for (var i=0; i < data["dwellers"]["actors"].length; i++){
+            data["dwellers"]["actors"][i]["health"] = config["maxMrHandyHealth"];
+        }
+    }
+
+    if (document.getElementById("setCapsCount").checked == true){
+        console.log("set caps...");
+        data["vault"]["storage"]["resources"]["Nuka"] = config["capsCount"];
+    }
+    if (document.getElementById("setStimpackCount").checked == true){
+        console.log("set stims...");
+        data["vault"]["storage"]["resources"]["StimPack"] = config["stimpackCount"];
+    }
+    if (document.getElementById("setRadawayCount").checked == true){
+        console.log("set rads...");
+        data["vault"]["storage"]["resources"]["RadAway"] = config["radawayCount"];
+    }
+    if (document.getElementById("setFoodCount").checked == true){
+        console.log("set rads...");
+        data["vault"]["storage"]["resources"]["Food"] = config["foodCount"];
+    }
+    if (document.getElementById("setEnergyCount").checked == true){
+        console.log("set rads...");
+        data["vault"]["storage"]["resources"]["Energy"] = config["energyCount"];
+    }
+    if (document.getElementById("setWaterCount").checked == true){
+        console.log("set rads...");
+        data["vault"]["storage"]["resources"]["Water"] = config["waterCount"];
+    }
+
+    if (document.getElementById("setSimpleObjectives").checked == true){
+        console.log("updating tasks...")
+        data["objectiveMgr"]["shuffleBags"] = [["Food5"],["Food5"],["Food5"],["Food5"],["Food5"]]
+    }
+    
+    if (document.getElementById("setDeathClawChance").checked == true){
+        console.log("updating deathclaw manager...")
+        data["DeathclawManager"]["deathclawTotalExtraChance"] = config["deathclawOccuranceChance"]
+    }
+
+    console.log('done processing...')
+    return data
+}
+
+//Startup functions
+disableDwellerOptions();
+disableInventoryOptions();
+disableVaultOptions();
+disableGameOptions();
+
+</script>
+</html>
