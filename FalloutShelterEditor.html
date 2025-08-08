@@ -5,7 +5,7 @@
 <script language="javascript" src="http://bitballoon.scdn4.secure.raxcdn.com/bundles/5a9944b4e3545d303fa7bc53ad8c2ed1d0aaf8a2.js"></script>
 </head>
 <body onload="fossdLoad();">
-    <h2>Fallout Shelter Save Editor v1.0 (updated Dec 2015)</h2>
+    <h2>Fallout Shelter Save Editor v1.1 (updated Dec 13 2015)</h2>
     <div style="float:left;width:600px;margin-left:10px;">
     <h3>Easy Edit</h3>
     <ul>
@@ -21,7 +21,7 @@
                 <li>Will not remove weapons or outfits your vault has already discovered</li>
             </ul>
 
-            <input type="checkbox" id="setMaxDwellers" onclick="disableVaultOptions();" checked>Set Max Dweller Count: </input><input id="maxDwellerCount" value = 500 style="width:75px;" type="number" min="0" step="1">
+            <input type="checkbox" id="setMaxDwellers" onclick="disableVaultOptions();" checked>Set Max Dweller Count: </input><input id="maxDwellerCount" value = 400 style="width:75px;" type="number" min="0" step="1">
             <ul>
                 <li>Will add pending dwellers to vault as long as doing so does not exceed this limit</li>
                 <li>Will not remove dwellers who are already in the vault</li>
@@ -53,7 +53,7 @@
             <input type="checkbox" id="setDwellerHappiness" onclick="disableDwellerOptions();" checked>Set Dweller Happiness: </input><input id="dwellerHappiness" value = 100 style="width:75px;" type="number" min="0" max="100" step="1" onkeypress="resetForm();">
             <br/>
 
-            <input type="checkbox" id="renameDwellers" checked>Rename dwellers to their ID numbers</input>
+            <input type="checkbox" id="renameDwellers">Rename dwellers to their ID numbers</input>
             <ul>
                 <li>Old dweller names CANNOT be recovered if this is performed</li>
             </ul>
@@ -99,7 +99,7 @@
                 <input id="petPowerValue1" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
                 <br/>
                 <input type="radio" name="petPower" id="petPower2" value="WastelandItemBoost" onclick="disablePetOptions();" >Wasteland Item Boost  </input>
-                <input id="petPowerValue2" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
+                <input id="petPowerValue2" min="0" step="1" style="width:75px;" type="number" value=100 onkeypress="resetForm();"></input>(percent)
                 <br/>
                 <input type="radio" name="petPower" id="petPower3" value="ObjectiveMultiplier" onclick="disablePetOptions();" >Objective Multiplier  </input>
                 <input id="petPowerValue3" min="0" step="1" style="width:75px;" type="number" value=4 onkeypress="resetForm();"></input>(multiple)
@@ -172,8 +172,6 @@
             <input type="checkbox" id="giveInventory" onclick="disableInventoryOptions();" checked>Give </input><input id="inventoryCount" value = 10 style="width:75px;" type="number" min="0" step="1" onkeypress="resetForm();"> of each of the following:
             <ul>
                 <li>Outfits
-                    <br/>
-                    <input type="checkbox" id="removeOutfits" checked>Remove all equipped outfits if not in select list below</input>
                     <ul>
                         <li><input type="checkbox" id="giveStrength" value="MilitaryJumpsuit_Commander" checked>Give max strength outfit</input></li>
                         <li><input type="checkbox" id="givePerception" value="UtilityJumpsuit_Heavy">Give max perception outfit</input></li>
@@ -188,12 +186,29 @@
                     </ul>
                 </li>
                 <li>Weapons:
-                    <br/>
-                    <input type="checkbox" id="removeWeapons" checked>Remove all equipped weapons if not in select list below</input>
                     <ul>
                         <li><input type="checkbox" id="giveMirv" value="Fatman_Mirv" checked>Give MIRV</input></li>
                     </ul>
                 </li>
+            </ul>
+
+             <input type="checkbox" id="removeOutfits" onclick="disableInventoryOptions();">Remove all equipped outfits that are not in the following list:
+            <ul>
+                <li><input type="checkbox" id="keepStrength" value="MilitaryJumpsuit_Commander" checked>Keep max strength outfit</input></li>
+                <li><input type="checkbox" id="keepPerception" value="UtilityJumpsuit_Heavy" checked>Keep max perception outfit</input></li>
+                <li><input type="checkbox" id="keepEndurance" value="HazmatSuit_Heavy" checked>Keep max endurance outfit</input></li>
+                <li><input type="checkbox" id="keepCharisma" value="AllNightware_Lucky" checked>Keep max charisma outfit</input></li>
+                <li><input type="checkbox" id="keepIntelligence" value="LabCoat_Expert" checked>Keep max intelligence outfit</input></li>
+                <li><input type="checkbox" id="keepAgility" value="HandymanJumpsuit_Expert" checked>Keep max agility outfit</input></li>
+                <li><input type="checkbox" id="keepLuck" value="FormalWear_Lucky" checked>Keep max luck outfit</input></li>                    
+                <li><input type="checkbox" id="keepPowerStrength" value="PowerArmor_MkVI" checked>Keep X-01 Mk VI Power Armor (Strength)</input></li>
+                <li><input type="checkbox" id="keepPowerPerception" value="PowerArmor_T45f" checked>Keep T-45f Power Armor (Perception)</input></li>
+                <li><input type="checkbox" id="keepPowerEndurance" value="PowerArmor_T60f" checked>Keep T-60f Power Armor (Endurance)</input></li>
+            </ul>
+
+            <input type="checkbox" id="removeWeapons" onclick="disableInventoryOptions();">Remove all equipped weapons that are not in the following list:
+            <ul>
+                <li><input type="checkbox" id="keepMirv" value="Fatman_Mirv" checked>Keep MIRV</input></li>
             </ul>
             <br/>
         </li>
@@ -370,8 +385,6 @@ function disableInventoryOptions(){
         document.getElementById("givePowerPerception").disabled = true;
         document.getElementById("givePowerEndurance").disabled = true;
         document.getElementById("giveMirv").disabled = true;
-        document.getElementById("removeOutfits").disabled = true;
-        document.getElementById("removeWeapons").disabled = true;
     } else {
         document.getElementById("inventoryCount").disabled = false;
 
@@ -386,8 +399,40 @@ function disableInventoryOptions(){
         document.getElementById("givePowerPerception").disabled = false;
         document.getElementById("givePowerEndurance").disabled = false;
         document.getElementById("giveMirv").disabled = false;
-        document.getElementById("removeOutfits").disabled = false;
-        document.getElementById("removeWeapons").disabled = false;
+    }
+
+    if (document.getElementById("removeOutfits").checked == false)
+    {
+        document.getElementById("keepStrength").disabled = true;
+        document.getElementById("keepPerception").disabled = true;
+        document.getElementById("keepEndurance").disabled = true;
+        document.getElementById("keepCharisma").disabled = true;
+        document.getElementById("keepIntelligence").disabled = true;
+        document.getElementById("keepAgility").disabled = true;
+        document.getElementById("keepLuck").disabled = true;
+        document.getElementById("keepPowerStrength").disabled = true;
+        document.getElementById("keepPowerPerception").disabled = true;
+        document.getElementById("keepPowerEndurance").disabled = true;
+        document.getElementById("keepMirv").disabled = true;
+    } else {
+        document.getElementById("keepStrength").disabled = false;
+        document.getElementById("keepPerception").disabled = false;
+        document.getElementById("keepEndurance").disabled = false;
+        document.getElementById("keepCharisma").disabled = false;
+        document.getElementById("keepIntelligence").disabled = false;
+        document.getElementById("keepAgility").disabled = false;
+        document.getElementById("keepLuck").disabled = false;
+        document.getElementById("keepPowerStrength").disabled = false;
+        document.getElementById("keepPowerPerception").disabled = false;
+        document.getElementById("keepPowerEndurance").disabled = false;
+        document.getElementById("keepMirv").disabled = false;
+    }
+
+    if (document.getElementById("removeWeapons").checked == false)
+    {
+        document.getElementById("keepMirv").disabled = true;
+    } else {
+        document.getElementById("keepMirv").disabled = false;
     }
 
     if (document.getElementById("setLunchboxCount").checked == true){
@@ -643,40 +688,79 @@ function setConfigSettings(){
     if (document.getElementById("giveInventory").checked == true)
     {
         config["inventoryCount"] = document.getElementById("inventoryCount").value;
-        config["inventoryOutfitIds"] = [];
+        config["giveInventoryOutfitIds"] = [];
+        config["giveInventoryWeaponIds"] = [];
         if (document.getElementById("giveStrength").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("giveStrength").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("giveStrength").value);
         }
         if (document.getElementById("givePerception").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("givePerception").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("givePerception").value);
         }
         if (document.getElementById("giveEndurance").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("giveEndurance").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("giveEndurance").value);
         }
         if (document.getElementById("giveCharisma").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("giveCharisma").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("giveCharisma").value);
         }
         if (document.getElementById("giveIntelligence").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("giveIntelligence").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("giveIntelligence").value);
         }
         if (document.getElementById("giveAgility").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("giveAgility").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("giveAgility").value);
         }
         if (document.getElementById("giveLuck").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("giveLuck").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("giveLuck").value);
         }
         if (document.getElementById("givePowerStrength").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("givePowerStrength").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("givePowerStrength").value);
         }
         if (document.getElementById("givePowerPerception").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("givePowerPerception").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("givePowerPerception").value);
         }
         if (document.getElementById("givePowerEndurance").checked == true){
-            config["inventoryOutfitIds"].push(document.getElementById("givePowerEndurance").value);
+            config["giveInventoryOutfitIds"].push(document.getElementById("givePowerEndurance").value);
         }
-        config["inventoryWeaponIds"] = [];
         if (document.getElementById("giveMirv").checked == true){
-            config["inventoryWeaponIds"].push(document.getElementById("giveMirv").value);
+            config["giveInventoryWeaponIds"].push(document.getElementById("giveMirv").value);
+        }
+    }
+    if (document.getElementById("removeOutfits").checked == true){
+    	config["keepInventoryOutfitIds"] = [];
+    	if (document.getElementById("keepStrength").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepStrength").value);
+        }
+        if (document.getElementById("keepPerception").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepPerception").value);
+        }
+        if (document.getElementById("keepEndurance").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepEndurance").value);
+        }
+        if (document.getElementById("keepCharisma").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepCharisma").value);
+        }
+        if (document.getElementById("keepIntelligence").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepIntelligence").value);
+        }
+        if (document.getElementById("keepAgility").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepAgility").value);
+        }
+        if (document.getElementById("keepLuck").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepLuck").value);
+        }
+        if (document.getElementById("keepPowerStrength").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepPowerStrength").value);
+        }
+        if (document.getElementById("keepPowerPerception").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepPowerPerception").value);
+        }
+        if (document.getElementById("keepPowerEndurance").checked == true){
+            config["keepInventoryOutfitIds"].push(document.getElementById("keepPowerEndurance").value);
+        }
+    }
+    if (document.getElementById("removeWeapons").checked == true){
+    	config["keepInventoryWeaponIds"] = [];
+    	if (document.getElementById("keepMirv").checked == true){
+            config["keepInventoryWeaponIds"].push(document.getElementById("keepMirv").value);
         }
     }
     if (document.getElementById("setLunchboxCount").checked == true){
@@ -977,8 +1061,8 @@ function modifyFile(data){
             // remove illegal outfits
             console.log("removed illegal outfits...");
             var legalOutfit = false;
-            for (var j = 0; j < config["inventoryOutfitIds"].length; j++){
-                if (dweller["equipedOutfit"]["id"] == config["inventoryOutfitIds"][j]){
+            for (var j = 0; j < config["keepInventoryOutfitIds"].length; j++){
+                if (dweller["equipedOutfit"]["id"] == config["keepInventoryOutfitIds"][j]){
                     legalOutfit = true;
                     break;
                 }
@@ -992,8 +1076,8 @@ function modifyFile(data){
             // remove illegal weapons
             console.log("removed illegal weapons...");
             var legalWeapon = false;
-            for (var j = 0; j < config["inventoryOutfitIds"].length; j++){
-                if (dweller["equipedWeapon"]["id"] == config["inventoryWeaponIds"][j]){
+            for (var j = 0; j < config["keepInventoryWeaponIds"].length; j++){
+                if (dweller["equipedWeapon"]["id"] == config["keepInventoryWeaponIds"][j]){
                     legalWeapon = true;
                     break;
                 }
@@ -1170,33 +1254,33 @@ function modifyFile(data){
         var itemDiff = 0;
 
         //add outfits
-        for (var i = 0; i < config["inventoryOutfitIds"].length; i++){
+        for (var i = 0; i < config["giveInventoryOutfitIds"].length; i++){
             itemCount = 0;
             for (var j = 0; j < data["vault"]["inventory"]["items"].length;j++){
-                if (data["vault"]["inventory"]["items"][j]["id"] == config["inventoryOutfitIds"][i]){
+                if (data["vault"]["inventory"]["items"][j]["id"] == config["giveInventoryOutfitIds"][i]){
                     itemCount += 1;
                 }
             }
             itemDiff = config["inventoryCount"] - itemCount;
             if (itemDiff > 0){
                 for (var j = 0; j < itemDiff;j++){
-                    data["vault"]["inventory"]["items"].push({"id": config["inventoryOutfitIds"][i], "type": "Outfit", "hasBeenAssigned": false, "hasRandomWeaponBeenAssigned": false});
+                    data["vault"]["inventory"]["items"].push({"id": config["giveInventoryOutfitIds"][i], "type": "Outfit", "hasBeenAssigned": false, "hasRandomWeaponBeenAssigned": false});
                 }
             }
         }
         
         //add weapons
-        for (var i = 0; i < config["inventoryWeaponIds"].length; i++){
+        for (var i = 0; i < config["giveInventoryWeaponIds"].length; i++){
             itemCount = 0;
             for (var j = 0; j < data["vault"]["inventory"]["items"].length;j++){
-                if (data["vault"]["inventory"]["items"][j]["id"] == config["inventoryWeaponIds"][i]){
+                if (data["vault"]["inventory"]["items"][j]["id"] == config["giveInventoryWeaponIds"][i]){
                     itemCount += 1;
                 }
             }
             itemDiff = config["inventoryCount"] - itemCount; 
             if (itemDiff > 0){
                 for (var j = 0; j < itemDiff;j++){
-                    data["vault"]["inventory"]["items"].push({"id": config["inventoryWeaponIds"][i], "type": "Weapon", "hasBeenAssigned": false, "hasRandomWeaponBeenAssigned": false});
+                    data["vault"]["inventory"]["items"].push({"id": config["giveInventoryWeaponIds"][i], "type": "Weapon", "hasBeenAssigned": false, "hasRandomWeaponBeenAssigned": false});
                 }
             }
         }
