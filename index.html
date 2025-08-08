@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fallout Shelter Save Editor v2.0</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json2/20150503/json2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Fallout Shelter Save Editor v2.0</h1>
+      </header>
+
+      <div class="main-content">
+        <div class="editor-section">
+          <h2>Easy Edit</h2>
+          <p>Imports sv2 to JSON, edits JSON, and exports to sv2</p>
+
+          <!-- Upload -->
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h4>Load Save File</h4>
+              <p>Select your Fallout Shelter .sv2 save file</p>
+              <div class="load-butons">
+                <input
+                  type="file"
+                  id="fileLoad"
+                  accept=".sv2"
+                  class="file-input"
+                />
+                <button
+                  type="button"
+                  id="exportSaveBtn"
+                  class="btn btn-primary"
+                >
+                  Export JSON
+                </button>
+              </div>
+              <div id="loadMsg" class="validation-message"></div>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h4>Manipulate Values</h4>
+
+              <form id="editorForm" class="editor-form">
+                <!-- Resources -->
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Resources</span>
+                    <span class="arrow">▼</span>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="accordion-content-inner">
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setEnergyCount" />
+                          Overwrite Vault Energy:
+                        </label>
+                        <input
+                          id="energyCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setFoodCount" />
+                          Overwrite Vault Food:
+                        </label>
+                        <input
+                          id="foodCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setWaterCount" />
+                          Overwrite Vault Water:
+                        </label>
+                        <input
+                          id="waterCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setCapsCount" />
+                          Overwrite Caps Count:
+                        </label>
+                        <input
+                          id="capsCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setNukaColaCount" />
+                          Overwrite Nuka Cola Quantum Count:
+                        </label>
+                        <input
+                          id="nukaColaCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setRemoveBoxes" />
+                          Overwrite Lunch Box Counts:
+                        </label>
+                        <div class="help-text warning">
+                          Will remove all your lunchboxes and replace with the
+                          below counts
+                        </div>
+                      </div>
+
+                      <div class="dependent-group">
+                        <div class="form-group">
+                          <label>
+                            Lunchboxes:
+
+                            <input
+                              id="lunchboxCount"
+                              type="number"
+                              min="0"
+                              step="1"
+                              class="number-input"
+                            />
+                          </label>
+                        </div>
+                        <div class="form-group">
+                          <label>
+                            Pet Crates:
+                            <input
+                              id="petCrateCount"
+                              type="number"
+                              min="0"
+                              step="1"
+                              class="number-input"
+                            />
+                          </label>
+                        </div>
+                        <div class="form-group">
+                          <label>
+                            My Handy boxes:
+
+                            <input
+                              id="mrHandyBoxCount"
+                              type="number"
+                              min="0"
+                              step="1"
+                              class="number-input"
+                            />
+                          </label>
+                        </div>
+                        <div class="form-group">
+                          <label>
+                            Starter Packs:
+                            <input
+                              id="lootCrateCount"
+                              type="number"
+                              min="0"
+                              step="1"
+                              class="number-input"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Vault -->
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Vault</span>
+                    <span class="arrow">▼</span>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="accordion-content-inner">
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setMaxDwellers" />
+                          Overwrite Max Dweller Count (Experimental):
+                        </label>
+                        <input
+                          id="maxDwellerCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                        <div class="help-text">
+                          Will add pending dwellers to vault as long as doing so
+                          does not exceed this limit
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setRemoveWaitingHandies" />
+                          Remove Waiting Mr. Handy's&nbsp;
+                          <span id="waitingHandyCount"></span>
+                        </label>
+                        <div class="help-text">
+                          Removes Mr Handy's that are waiting in line
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="abortPregnancies" />
+                          Abort pregnancies
+                        </label>
+                        <div class="help-text">
+                          Women will be permanently pregnant (and won't fight)
+                          if dweller count is 200+
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setReturnDwellers" />
+                          Return all returning dwellers to vault&nbsp;<span
+                            id="returning-dwellers-placeholder"
+                          ></span>
+                        </label>
+                        <div class="help-text">
+                          Will only affect dwellers that are already returning
+                          to the vault
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setIncreaseExploreTime" />
+                          Fast forward 5 days for exploring dwellers&nbsp;<span
+                            id="exploring-dwellers-placeholder"
+                          ></span>
+                        </label>
+                        <div class="help-text">
+                          5 days is the in-game max, after which dwellers
+                          automatically turn back
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input
+                            type="checkbox"
+                            id="giveExplorersHealthPacks"
+                          />
+                          Give all exploring dwellers max Stimpacks and Radaways
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dweller Settings -->
+                <div class="accordion-item">
+                  <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Dwellers</span>
+                    <span class="arrow">▼</span>
+                  </div>
+                  <div class="accordion-content">
+                    <div class="accordion-content-inner">
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setMaxMrHandyHealth" />
+                          Overwrite Max Mr. Handy Health:
+                        </label>
+                        <input
+                          id="maxMrHandyHealth"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setMaxDwellerHealth" />
+                          Overwrite Max Dweller Health:
+                        </label>
+                        <input
+                          id="maxDwellerHealth"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setDwellerRad" />
+                          Overwrite Dweller Radiation Level:
+                        </label>
+                        <input
+                          id="dwellerRadLevel"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setDwellerHappiness" />
+                          Overwrite Dweller Happiness:
+                        </label>
+                        <input
+                          id="dwellerHappiness"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="1"
+                          class="number-input"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setPetBonusValue" />
+                          Boost Pet Bonus Value
+                        </label>
+                        <div class="help-text">
+                          Overwrites pet boosts with a large value
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="renameDwellers" />
+                          Rename dwellers to their ID numbers
+                        </label>
+                        <div class="help-text warning">
+                          Old dweller names CANNOT be recovered if this is
+                          performed
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setMaxStats" />
+                          Overwrite all SPECIAL stats to 10
+                        </label>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setDwellerLvl" />
+                          Overwrite all dwellers to level 50
+                        </label>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="discoverItems" />
+                          Discover additional weapons and outfits
+                        </label>
+                        <div class="help-text">
+                          Required if manipulating weapons or outfits
+                        </div>
+                      </div>
+
+                      <div class="dependent-group">
+                        <div class="form-group">
+                          <label>
+                            <input type="checkbox" id="equipMaxWeapon" />
+                            Equip all dwellers with "<span
+                              id="bestWeaponName"
+                            ></span
+                            >"
+                          </label>
+                          <div class="help-text warning">
+                            This will permanently replace all equipped weapons.
+                            Unequip any weapons you want to save
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label>
+                            <input type="checkbox" id="equipBestArmor" />
+                            Equip all dwellers with best outfit for assigned
+                            room
+                          </label>
+                          <div class="help-text warning">
+                            This will permanently replace all equipped outfits
+                            for dwellers that are assigned to rooms. Unequip any
+                            outfits you want to save
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label>
+                            <input type="checkbox" id="giveInventory" />
+                            Add outfits and weapons to inventory:
+                          </label>
+                          <ul id="inventoryList"></ul>
+                          <label id="giveInventoryCount-label">
+                            Target Count:
+                            <input
+                              id="giveInventoryCount"
+                              type="number"
+                              min="0"
+                              max="25"
+                              step="1"
+                              class="number-input"
+                            />
+                          </label>
+                          <div class="help-text">
+                            For each listed item, will increase the count in the
+                            inventory to the target count
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label>
+                            <input type="checkbox" id="giveQuestItems" />
+                            Add quest items to inventory
+                          </label>
+                          <div class="help-text">
+                            Will add quest weapons and outfits to inventory
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Validate & Export -->
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h4>Validate & Save</h4>
+              <p>Validate your changes and export to .sv2</p>
+              <button type="button" id="validateBtn" class="btn btn-primary">
+                Validate
+              </button>
+              <button type="button" id="saveBtn" class="btn btn-primary">
+                Save
+              </button>
+              <button
+                type="button"
+                id="exportUpdatedBtn"
+                class="btn btn-primary"
+              >
+                Export JSON
+              </button>
+              <div id="validationMsg" class="validation-message"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="instructions-section">
+          <h2>Instructions</h2>
+          <div class="instructions">
+            <h3>For iPhone users:</h3>
+            <ol>
+              <li>Save vault to iCloud on iPhone</li>
+              <li>
+                Retrieve .sv2 file using Terminal command:<br />
+                <code
+                  >open ~/Library/Mobile\
+                  Documents/iCloud~com~bethsoft~falloutshelter</code
+                >
+              </li>
+              <li>
+                Copy vault file to Downloads and/or to a safe place as a backup
+              </li>
+              <li>
+                In Fallout Shelter, uncheck the iCloud option next to your save
+                file and delete the save
+              </li>
+              <li>
+                Load your .sv2 file in step 1 to the left and make any
+                configuration changes you want
+              </li>
+              <li>Validate and Save your file</li>
+              <li>
+                Copy the new file to iCloud folder. Wait for the upload to
+                complete.
+              </li>
+              <li>
+                Back in Fallout Shelter, check off the iCloud icon next to the
+                appropriate save slot. Your modified save should load (if it
+                doesn't, the iCloud upload is probably not complete yet)
+              </li>
+            </ol>
+          </div>
+
+          <div class="advanced-section">
+            <h3>Advanced Tools</h3>
+            <div class="form-group">
+              <label>Decrypt sv2 to JSON:</label>
+              <input
+                type="file"
+                id="decryptInput"
+                accept=".sv2"
+                class="file-input"
+              />
+            </div>
+            <div class="form-group">
+              <label>Encrypt JSON to sv2:</label>
+              <input
+                type="file"
+                id="encryptInput"
+                accept=".json"
+                class="file-input"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>Created by /u/Fraun_Pollen, Vault 68</p>
+        <p>Credit to u/Xeth137 for providing file decryptor/encryptor</p>
+      </footer>
+    </div>
+
+    <script>
+      function toggleAccordion(header) {
+        const content = header.nextElementSibling;
+        const arrow = header.querySelector(".arrow");
+
+        // Close all other accordions
+        document
+          .querySelectorAll(".accordion-header")
+          .forEach((otherHeader) => {
+            if (otherHeader !== header) {
+              const otherContent = otherHeader.nextElementSibling;
+              const otherArrow = otherHeader.querySelector(".arrow");
+
+              otherHeader.classList.remove("active");
+              otherContent.classList.remove("active");
+            }
+          });
+
+        // Toggle current accordion
+        header.classList.toggle("active");
+        content.classList.toggle("active");
+      }
+    </script>
+    <script src="src/sjcl.js"></script>
+    <script src="src/fileEncryptor.js"></script>
+    <script src="src/saveEditor.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>

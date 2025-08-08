@@ -1,10 +1,13 @@
 Changelog
 
-v2.0
-(planned) Support for time fixing
-(planned) Import/export config
+v2.0.0 (08/06/2025)
+- Updated encryption and decryption logic
+- Revamped UI layout
+- Preload values from save file
+- Turn off all overwrites by default
+- Add ability to assign outfits based on assigned room
 
-v1.1.0
+v1.1.0 (12/21/2015)
 - Extend dweller exploration time and reissue health
 
 v1.0.1 (12/13/2015)
