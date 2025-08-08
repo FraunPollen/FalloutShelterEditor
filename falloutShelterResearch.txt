@@ -1,0 +1,28 @@
+Editing game:
+- Access .sav file through Terminal [open ~/Library/Mobile\ Documents/iCloud~com~bethsoft~falloutshelter]
+- Decrypt .sav file (http://fossd.bitballoon.com/)
+- Edit JSON then reencrypt
+- Uncheck [iCloud] on phone save
+- Delete game on phone (phone version of game will overwrite anything in iCloud)
+- Add edited .sav file in iCloud
+- Recheck [iCloud] on phone slot
+
+Weapons:
+- Add weapon code to ["survivalW":"weapons"]
+- Now add to inventory: [{"id":"Fatman_Mirv","type":"Weapon","hasBeenAssigned":false,"hasRandonWeaponBeenAssigned":false},]
+- Or replace a dweller's held weapon with Fatman_Mirv
+Fatman_Mirv O32 
+
+
+All weapons, dwellers, and outfits discovered:
+["survivalW": { "weapons": [ "O24", "O19", "O4", "O0", "O21", "O2", "O99", "O94", "O81", "O96", "O76", "O124", "O79", "O119", "O121", "O62", "O57", "O130", "O59", "O125", "O127", "O67", "O22", "O20", "O3", "O1", "O97", "O95", "O80", "O77", "O122", "O120", "O60", "O58", "O128", "O64", "O126", "O18", "O69", "O13", "O66", "O136", "O15", "O65", "O131", "O16", "O133", "O14", "O141", "O135", "O137", "O104", "O132", "O139", "N100", "O140", "O105", "O138", "O73", "O102", "O70", "O31", "O74", "O26", "O72", "O118", "O29", "O113", "O30", "O115", "O44", "O39", "O41", "O56", "O42", "O51", "O110", "O43", "O106", "O23", "O5", "O98", "O78", "O123", "O61", "O129", "O68", "O17", "O134", "O63", "O142", "O101", "O103", "O71", "O75", "O28", "O116", "O27", "O114", "O117", "O53", "O40", "O54", "O10", "O111", "O52", "O108", "O55", "O6", "O11", "O87", "O107", "O82", "O9", "O109", "O7", "O84", "O93", "O8", "O85", "O88", "O48", "O83", "O89", "O45", "O86", "O91", "O37", "O49", "O90", "O32", "O47", "O92", "O33", "O46", "O35", "O50", "O34", "O36" ], "dwellers": [ "OL_Abraham Washington", "OL_AlistairTenpenny", "OL_Amata", "OL_Bittercup", "OL_Butch", "OL_ColonelAutumn", "OL_ConfessorCromwell", "OL_Dr. Li", "OL_ElderLyons", "OL_Eulogy Jones", "NL_Harkness", "OL_James", "OL_Jericho", "OL_Lucas Simms", "OL_Moira Brown", "OL_Mr. Burque", "OL_Preston", "OL_Sarah Lyons", "OL_Scribe Rothchild", "OL_Star Paladin Cross", "OL_ThreeDog" ], "outfits": [ "O103", "O106", "O111", "O13", "O2", "O33", "O37", "O41", "O49", "O55", "O6", "O78", "O81", "O84", "O89", "O95", "O100", "O101", "O105", "O108", "O110", "O112", "O15", "O16", "O30", "O31", "O34", "O36", "O38", "O4", "O43", "O47", "O48", "O50", "O52", "O54", "O57", "O59", "O61", "O76", "O77", "O79", "O8", "O83", "O86", "O9", "O91", "O92", "O93", "O96", "O97", "O98", "O64", "O63", "O65", "O67", "O72", "O68", "O70", "O73", "O1", "O10", "O102", "O104", "O107", "O109", "O11", "O12", "O14", "O27", "O3", "O32", "O35", "O39", "O42", "O51", "O53", "O56", "O66", "O69", "O7", "O71", "O74", "O80", "O82", "O85", "O87", "O90", "O94", "N75" ] },]
+- N prefix is new item in survival guide, O means it has already been checked
+
+Adding lunch boxes:
+- Add 1 (Mr. Handy) or 0 (lunch box) to ["LunchBoxesByType":[]]
+- Update count to correct count ["LunchBoxesCount":] and ["Resources":"Lunchboxes":]
+
+Fixing time:
+- change [timeMgr: time] and [taskMgr: time] to match the greatest endTime in [taskMgr: tasks] (ex. dayRating)
+
+
