@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -132,6 +132,44 @@
 
                       <div class="form-group">
                         <label>
+                          <input type="checkbox" id="setPokerChipCount" />
+                          Overwrite Poker Chip Count:
+                        </label>
+                        <input
+                          id="pokerChipCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                        <div class="help-text warning">
+                          Only used for some Season vaults. Verify if you have
+                          any in a decrpyted JSON at
+                          data.vault.storage.resources.PokerChip
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setUltraciteCount" />
+                          Overwrite Ultracite Count:
+                        </label>
+                        <input
+                          id="ultraciteCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                        <div class="help-text warning">
+                          Only used for some Season vaults. Verify if you have
+                          any in a decrpyted JSON at
+                          data.vault.storage.resources.DummyUltracite
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
                           <input type="checkbox" id="setRemoveBoxes" />
                           Overwrite Lunch Box Counts:
                         </label>
@@ -208,7 +246,8 @@
                       <div class="form-group">
                         <label>
                           <input type="checkbox" id="setMaxDwellers" />
-                          Overwrite Max Dweller Count: <span class="experimental">Experimental</span>
+                          Overwrite Max Dweller Count:
+                          <span class="experimental">Experimental</span>
                         </label>
                         <input
                           id="maxDwellerCount"
@@ -219,7 +258,8 @@
                         />
                         <div class="help-text">
                           Will add pending dwellers to vault as long as doing so
-                          does not exceed this limit
+                          does not exceed this limit. Otherwise clears waiting
+                          line.
                         </div>
                       </div>
 
@@ -230,7 +270,8 @@
                           <span id="waitingHandyCount"></span>
                         </label>
                         <div class="help-text">
-                          Removes Mr Handy's that are waiting in line
+                          Removes Mr Handy's that are waiting in line. Will also
+                          remove Mr. Handy's that are exploring.
                         </div>
                       </div>
 
@@ -259,15 +300,25 @@
                       </div>
 
                       <div class="form-group">
-                        <label>
-                          <input type="checkbox" id="setIncreaseExploreTime" />
-                          Fast forward 5 days for exploring dwellers&nbsp;<span
-                            id="exploring-dwellers-placeholder"
-                          ></span> <span class="experimental">Experimental</span>
-                        </label>
+                        <div class="row">
+                          <label>
+                            <input
+                              type="checkbox"
+                              id="setIncreaseExploreTime"
+                            />
+                            Fast forward 5 days for exploring
+                            dwellers&nbsp;<span
+                              id="exploring-dwellers-placeholder"
+                            ></span>
+                          </label>
+                        </div>
+                        <div class="row">
+                          <span class="experimental">Experimental</span>
+                        </div>
                         <div class="help-text">
                           5 days is the in-game max, after which dwellers
-                          automatically turn back
+                          automatically turn back. This will not increase the
+                          items that were collected.
                         </div>
                       </div>
 
@@ -352,7 +403,8 @@
                       <div class="form-group">
                         <label>
                           <input type="checkbox" id="setPetBonusValue" />
-                          Boost Pet Bonus Value <span class="experimental">Experimental</span>
+                          Boost Pet Bonus Value
+                          <span class="experimental">Experimental</span>
                         </label>
                         <div class="help-text">
                           Overwrites pet boosts with a large value
@@ -427,22 +479,13 @@
                             <input type="checkbox" id="giveInventory" />
                             Add outfits and weapons to inventory:
                           </label>
-                          <ul id="inventoryList"></ul>
-                          <label id="giveInventoryCount-label">
-                            Target Count:
-                            <input
-                              id="giveInventoryCount"
-                              type="number"
-                              min="0"
-                              max="25"
-                              step="1"
-                              class="number-input"
-                            />
-                          </label>
                           <div class="help-text">
-                            For each listed item, will increase the count in the
-                            inventory to the target count
+                            For each listed item, set the target count you want
+                            in the inventory. Items already at or above the
+                            target will not be changed.
                           </div>
+                          <!-- Per-item inventory list rendered by updatePlaceholders() -->
+                          <ul id="inventoryList" class="inventory-list"></ul>
                         </div>
 
                         <div class="form-group">

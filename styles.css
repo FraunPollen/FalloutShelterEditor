@@ -405,6 +405,12 @@ footer p {
   margin-left: 20px;
 }
 
+.row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
 .experimental {
   background-color: #fbbf24; /* Brighter yellow */
   color: #1f2937; /* Dark gray text */

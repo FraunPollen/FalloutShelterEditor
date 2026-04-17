@@ -25,14 +25,15 @@ class SaveEditor {
     str: "PowerArmor_MkVI",
     per: "PowerArmor_T45f",
     end: "PowerArmor_T60f",
-    // mix: "PowerArmor_T51f", // str + per
+    mix1: "ScarredPowerArmor",
+    mix2: "EnclavePowerArmor", // always available? (was season)
   };
 
   static BEST_OUTFITS = {
     str: "MilitaryJumpsuit_Commander", // 7
     per: "UtilityJumpsuit_Heavy", // 7
     end: "HazmatSuit_Heavy", // 7
-    cha: "AllNightware_Lucky", // 5
+    cha: "AllNightware_Lucky", // 7
     int: "LabCoat_Expert", // 7
     agi: "HandymanJumpsuit_Expert", // 7
     luk: "FormalWear_Lucky", // 7
@@ -56,6 +57,7 @@ class SaveEditor {
     Dojo: SaveEditor.SPECIALS.str,
     Energy: SaveEditor.SPECIALS.str,
     Energy2: SaveEditor.SPECIALS.str,
+    Entrance: null,
     Gym: SaveEditor.SPECIALS.agi,
     Hydroponic: SaveEditor.SPECIALS.agi,
     LivingQuarters: SaveEditor.SPECIALS.cha,
@@ -63,7 +65,7 @@ class SaveEditor {
     NukaCola: SaveEditor.SPECIALS.end,
     Radio: SaveEditor.SPECIALS.cha,
     ScienceLab: SaveEditor.SPECIALS.int,
-    Storage: SaveEditor.SPECIALS.end,
+    Storage: null, // assume storage is holding cell for explorers
     SuperRoom2: SaveEditor.SPECIALS.str, // ?
     Water: SaveEditor.SPECIALS.per,
     Water2: SaveEditor.SPECIALS.per,
@@ -653,6 +655,8 @@ class SaveEditor {
         "SawedOffShotgun_Rusty",
         "Shotgun",
         "PowerArmor_T51f",
+        "ScarredPowerArmor",
+        "EnclavePowerArmor",
       ],
     };
   }
@@ -698,7 +702,7 @@ class SaveEditor {
       data.dwellers.actors = data.dwellers.actors.filter(
         (a) =>
           a.characterType == SaveEditor.CHARACTER_TYPES.handy &&
-          a.savedRoom > -1
+          a.savedRoom > -1,
       );
     }
 
@@ -724,7 +728,7 @@ class SaveEditor {
     if (data.dwellers.dwellers.length > config.maxDwellerCount) {
       waitingDwellerIds.forEach((waitingId) => {
         const dwellerIndex = data.dwellers.dwellers.findIndex(
-          (dweller) => dweller.serializeId === waitingId
+          (dweller) => dweller.serializeId === waitingId,
         );
         if (dwellerIndex !== -1) {
           data.dwellers.dwellers.splice(dwellerIndex, 1);
@@ -741,7 +745,7 @@ class SaveEditor {
     // Remove waiting actors
     waitingActorIds.forEach((actorId) => {
       const actorIndex = data.dwellers.actors.findIndex(
-        (actor) => actor.serializeId === actorId
+        (actor) => actor.serializeId === actorId,
       );
       if (actorIndex !== -1) {
         data.dwellers.actors.splice(actorIndex, 1);
@@ -763,8 +767,8 @@ class SaveEditor {
       // Rename dwellers
       if (config.renameDwellers) {
         const id = String(dweller.serializeId).padStart(3, "0");
-        dweller.name = `d${id}`;
-        dweller.lastName = `vault${data.vault.VaultName}`;
+        dweller.name = id;
+        dweller.lastName = "";
       }
 
       // Update health
@@ -809,56 +813,58 @@ class SaveEditor {
       // Equip best outfit
       if (config.equipBestArmor) {
         const room = data.vault.rooms.find((r) =>
-          r.dwellers.includes(dweller.serializeId)
+          r.dwellers.includes(dweller.serializeId),
         );
         const isWasteland = data.vault.wasteland.teams.find(
           (t) =>
-            t.dwellers.find((d) => d.serializeId == dweller.serializeId) != null
+            t.dwellers.find((d) => d.serializeId == dweller.serializeId) !=
+            null,
         );
         if (room) {
-          if (["Entrance", "Overseer"].includes(room.type)) {
-            dweller.equipedOutfit.id = SaveEditor.POWER_ARMORS.str;
-          } else {
-            const special = SaveEditor.ROOM_STAT_MAP[room.type];
-            if (special) {
-              switch (special) {
-                case SaveEditor.SPECIALS.str:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.str;
-                  break;
-                case SaveEditor.SPECIALS.per:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.per;
-                  break;
-                case SaveEditor.SPECIALS.end:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.end;
-                  break;
-                case SaveEditor.SPECIALS.cha:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.cha;
-                  break;
-                case SaveEditor.SPECIALS.int:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.int;
-                  break;
-                case SaveEditor.SPECIALS.agi:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.agi;
-                  break;
-                case SaveEditor.SPECIALS.luk:
-                  dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.luk;
-                  break;
-                default:
-                  break;
+          const special = SaveEditor.ROOM_STAT_MAP[room.type];
+          switch (special) {
+            case null:
+              if (![SaveEditor.POWER_ARMORS.mix1, SaveEditor.POWER_ARMORS.mix2].includes(dweller.equipedOutfit.id)) {
+                dweller.equipedOutfit.id = SaveEditor.POWER_ARMORS.mix1;
               }
-            }
+              break;
+            case SaveEditor.SPECIALS.str:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.str;
+              break;
+            case SaveEditor.SPECIALS.per:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.per;
+              break;
+            case SaveEditor.SPECIALS.end:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.end;
+              break;
+            case SaveEditor.SPECIALS.cha:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.cha;
+              break;
+            case SaveEditor.SPECIALS.int:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.int;
+              break;
+            case SaveEditor.SPECIALS.agi:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.agi;
+              break;
+            case SaveEditor.SPECIALS.luk:
+              dweller.equipedOutfit.id = SaveEditor.BEST_OUTFITS.luk;
+              break;
+            default:
+              break;
           }
           console.log(
-            `Assigned outfit ${dweller.equipedOutfit.id} to dweller ID ${dweller.serializeId} (matched to room ${room.deserializeID}, ${room.type})`
+            `Assigned outfit ${dweller.equipedOutfit.id} to dweller ID ${dweller.serializeId} (matched to room ${room.deserializeID}, ${room.type})`,
           );
         } else if (isWasteland) {
-          dweller.equipedOutfit.id = SaveEditor.POWER_ARMORS.per;
-          console.log(
-            `Assigned outfit ${dweller.equipedOutfit.id} to exploring dweller ID ${dweller.serializeId}`
-          );
+          if (![SaveEditor.POWER_ARMORS.mix1, SaveEditor.POWER_ARMORS.mix2].includes(dweller.equipedOutfit.id)) {
+            dweller.equipedOutfit.id = SaveEditor.POWER_ARMORS.mix1;
+            console.log(
+              `Assigned outfit ${dweller.equipedOutfit.id} to exploring dweller ID ${dweller.serializeId}`,
+            );
+          }
         } else {
           console.warn(
-            `Could not find assigned room for dweller ID ${dweller.serializeId}`
+            `Could not find assigned room for dweller ID ${dweller.serializeId}`,
           );
         }
       }
@@ -921,7 +927,11 @@ class SaveEditor {
   }
 
   /**
-   * Update vault inventory
+   * Update vault inventory.
+   * Uses config.giveInventoryCounts (a per-item map of { itemId -> targetCount })
+   * when config.giveInventory is true. Falls back to config.giveInventoryCount
+   * (the old single-count field) if the per-item map is absent, for
+   * backward-compatibility with any callers that haven't migrated yet.
    * @param {Object} data - Save data
    * @param {Object} config - Configuration
    */
@@ -930,7 +940,7 @@ class SaveEditor {
       // Add 1 of each quest outfit to inventory
       SaveEditor.QUEST_ITEMS_OUTFITS.forEach((outfitId) => {
         const exists = data.vault.inventory.items.find(
-          (item) => item.id === outfitId
+          (item) => item.id === outfitId,
         );
 
         if (!exists) {
@@ -946,7 +956,7 @@ class SaveEditor {
       // Add 1 of each quest weapon to inventory
       SaveEditor.QUEST_ITEMS_WEAPONS.forEach((weaponId) => {
         const exists = data.vault.inventory.items.find(
-          (item) => item.id === weaponId
+          (item) => item.id === weaponId,
         );
 
         if (!exists) {
@@ -961,15 +971,37 @@ class SaveEditor {
     }
 
     if (config.giveInventory) {
+      /**
+       * Returns the target count for a given item ID.
+       * Prefers the per-item map (giveInventoryCounts); falls back to the
+       * legacy scalar (giveInventoryCount) when the map is missing.
+       * @param {string} id
+       * @returns {number}
+       */
+      const targetCountFor = (id) => {
+        if (
+          config.giveInventoryCounts &&
+          config.giveInventoryCounts[id] !== undefined
+        ) {
+          return config.giveInventoryCounts[id];
+        }
+        // Legacy fallback
+        return config.giveInventoryCount ?? 0;
+      };
+
       // Add outfits to inventory
       if (config.giveInventoryOutfitIds) {
         config.giveInventoryOutfitIds.forEach((outfitId) => {
+          const target = targetCountFor(outfitId);
           const currentCount = data.vault.inventory.items.filter(
-            (item) => item.id === outfitId
+            (item) => item.id === outfitId,
           ).length;
 
-          const needed = config.giveInventoryCount - currentCount;
+          const needed = target - currentCount;
           if (needed > 0) {
+            console.log(
+              `Adding ${needed} of outfit "${outfitId}" (current: ${currentCount}, target: ${target})`,
+            );
             for (let i = 0; i < needed; i++) {
               data.vault.inventory.items.push({
                 id: outfitId,
@@ -978,6 +1010,10 @@ class SaveEditor {
                 hasRandomWeaponBeenAssigned: false,
               });
             }
+          } else {
+            console.log(
+              `Skipping outfit "${outfitId}" — already at or above target (current: ${currentCount}, target: ${target})`,
+            );
           }
         });
       }
@@ -985,12 +1021,16 @@ class SaveEditor {
       // Add weapons to inventory
       if (config.giveInventoryWeaponIds) {
         config.giveInventoryWeaponIds.forEach((weaponId) => {
+          const target = targetCountFor(weaponId);
           const currentCount = data.vault.inventory.items.filter(
-            (item) => item.id === weaponId
+            (item) => item.id === weaponId,
           ).length;
 
-          const needed = config.giveInventoryCount - currentCount;
+          const needed = target - currentCount;
           if (needed > 0) {
+            console.log(
+              `Adding ${needed} of weapon "${weaponId}" (current: ${currentCount}, target: ${target})`,
+            );
             for (let i = 0; i < needed; i++) {
               data.vault.inventory.items.push({
                 id: weaponId,
@@ -999,6 +1039,10 @@ class SaveEditor {
                 hasRandomWeaponBeenAssigned: false,
               });
             }
+          } else {
+            console.log(
+              `Skipping weapon "${weaponId}" — already at or above target (current: ${currentCount}, target: ${target})`,
+            );
           }
         });
       }
@@ -1025,6 +1069,9 @@ class SaveEditor {
     if (config.setWaterCount) resources.Water = config.waterCount;
     if (config.setNukaColaCount)
       resources.NukaColaQuantum = config.nukaColaCount;
+    if (config.setPokerChipCount) resources.PokerChip = config.pokerChipCount;
+    if (config.setUltraciteCount)
+      resources.DummyUltracite = config.ultraciteCount;
 
     // Handle lunchboxes
     this.manageLunchboxes(data, config);
@@ -1091,7 +1138,7 @@ class SaveEditor {
       if (config.giveExplorersHealthPacks) {
         explorer.dwellers.forEach((dwellerId) => {
           const dweller = data.dwellers.dwellers.find(
-            (d) => d.serializeId === dwellerId
+            (d) => d.serializeId === dwellerId,
           );
           if (dweller && dweller.equipment && dweller.equipment.storage) {
             dweller.equipment.storage.resources.StimPack = 25;
@@ -1166,7 +1213,7 @@ class SaveEditor {
             }
           } else {
             console.warn(
-              `Unhandled pet bonus type detected: ${dweller.equippedPet.extraData.bonus}`
+              `Unhandled pet bonus type detected: ${dweller.equippedPet.extraData.bonus}`,
             );
           }
         }
@@ -1186,7 +1233,7 @@ class SaveEditor {
             }
           } else {
             console.warn(
-              `Unhandled pet bonus type detected in inventory: ${item.extraData.bonus}`
+              `Unhandled pet bonus type detected in inventory: ${item.extraData.bonus}`,
             );
           }
         }
@@ -1253,6 +1300,18 @@ class SaveEditor {
       }
     });
 
+    // Validate per-item inventory counts
+    if (config.giveInventory && config.giveInventoryCounts) {
+      Object.entries(config.giveInventoryCounts).forEach(([itemId, count]) => {
+        const value = Number(count);
+        if (isNaN(value) || value < 0) {
+          errors.push(
+            `Inventory count for "${itemId}" must be a valid non-negative number`,
+          );
+        }
+      });
+    }
+
     // Validate happiness range
     if (config.dwellerHappiness !== undefined) {
       const happiness = Number(config.dwellerHappiness);
@@ -1308,16 +1367,16 @@ class SaveEditor {
       maxMrHandyHealth: 5000,
       deathClawChance: data.DeathclawManager.deathclawTotalExtraChance,
       lunchboxCount: data.vault.LunchBoxesByType.filter(
-        (box) => box === SaveEditor.LUNCH_BOX_TYPES.lunch
+        (box) => box === SaveEditor.LUNCH_BOX_TYPES.lunch,
       ).length,
       mrHandyBoxCount: data.vault.LunchBoxesByType.filter(
-        (box) => box === SaveEditor.LUNCH_BOX_TYPES.handy
+        (box) => box === SaveEditor.LUNCH_BOX_TYPES.handy,
       ).length,
       petCrateCount: data.vault.LunchBoxesByType.filter(
-        (box) => box === SaveEditor.LUNCH_BOX_TYPES.pet
+        (box) => box === SaveEditor.LUNCH_BOX_TYPES.pet,
       ).length,
       lootCrateCount: data.vault.LunchBoxesByType.filter(
-        (box) => box === SaveEditor.LUNCH_BOX_TYPES.loot
+        (box) => box === SaveEditor.LUNCH_BOX_TYPES.loot,
       ).length,
       capsCount: data.vault.storage.resources.Nuka,
       stimpackCount: data.vault.storage.resources.StimPack,
@@ -1329,6 +1388,11 @@ class SaveEditor {
       maxDwellerCount: data.dwellers.dwellers.length,
       maxDwellerHealth: data.dwellers.dwellers[0].health.maxHealth || 300,
       dwellerRadLevel: 0,
+      ultraciteCount: data.vault.storage.resources.DummyUltracite,
+      pokerChipCount: data.vault.storage.resources.PokerChip,
+      // giveInventoryCounts is populated by updatePlaceholders() in the UI layer,
+      // since it depends on which item IDs are in the configured lists.
+      giveInventoryCounts: {},
     };
 
     return config;

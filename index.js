@@ -22,7 +22,9 @@ class FalloutSaveEditorApp {
     "stimpackCount",
     "waterCount",
     "lunchboxCount",
-    "giveInventoryCount",
+    "pokerChipCount",
+    "ultraciteCount",
+    // NOTE: giveInventoryCount is intentionally omitted — counts are now per-item
   ];
 
   BOOLEAN_FIELDS = [
@@ -58,6 +60,8 @@ class FalloutSaveEditorApp {
     "setRemoveWaitingHandies",
     "setPetBonusValue",
     "giveQuestItems",
+    "setPokerChipCount",
+    "setUltraciteCount",
   ];
 
   constructor() {
@@ -66,6 +70,8 @@ class FalloutSaveEditorApp {
         SaveEditor.POWER_ARMORS.str,
         SaveEditor.POWER_ARMORS.per,
         SaveEditor.POWER_ARMORS.end,
+        SaveEditor.POWER_ARMORS.mix1,
+        SaveEditor.POWER_ARMORS.mix2,
         SaveEditor.BEST_OUTFITS.str,
         SaveEditor.BEST_OUTFITS.per,
         SaveEditor.BEST_OUTFITS.end,
@@ -75,6 +81,8 @@ class FalloutSaveEditorApp {
         SaveEditor.BEST_OUTFITS.luk,
       ],
       giveInventoryWeaponIds: [SaveEditor.BEST_WEAPON],
+      // Per-item target counts; keyed by item ID. Populated by updatePlaceholders().
+      giveInventoryCounts: {},
     };
     this.currentSaveData = null;
     this.modifiedSaveData = null;
@@ -195,11 +203,18 @@ class FalloutSaveEditorApp {
       },
       {
         checkbox: "discoverItems",
-        targets: ["equipMaxWeapon", "equipBestArmor", "giveInventory", "giveQuestItems"],
+        targets: [
+          "equipMaxWeapon",
+          "equipBestArmor",
+          "giveInventory",
+          "giveQuestItems",
+        ],
       },
+      // NOTE: giveInventory no longer controls a single giveInventoryCount input.
+      // Instead it enables/disables all per-item count inputs rendered in the list.
       {
         checkbox: "giveInventory",
-        targets: ["giveInventoryCount"],
+        targets: [], // per-item inputs are handled separately via _refreshInventoryInputState
       },
       {
         checkbox: "setRemoveBoxes",
@@ -209,6 +224,14 @@ class FalloutSaveEditorApp {
           "mrHandyBoxCount",
           "lootCrateCount",
         ],
+      },
+      {
+        checkbox: "setPokerChipCount",
+        targets: ["pokerChipCount"],
+      },
+      {
+        checkbox: "setUltraciteCount",
+        targets: ["ultraciteCount"],
       },
     ];
 
@@ -223,12 +246,30 @@ class FalloutSaveEditorApp {
               target.disabled = !checkboxEl.checked;
             }
           });
+
+          // Special handling: enable/disable all per-item inventory inputs
+          if (checkbox === "giveInventory") {
+            this._refreshInventoryInputState(checkboxEl.checked);
+          }
+
           this.resetValidation();
         });
 
         // Trigger initial state
         checkboxEl.dispatchEvent(new Event("change"));
       }
+    });
+  }
+
+  /**
+   * Enable or disable all per-item inventory count inputs inside #inventoryList
+   * @param {boolean} enabled
+   */
+  _refreshInventoryInputState(enabled) {
+    const listContainer = document.getElementById("inventoryList");
+    if (!listContainer) return;
+    listContainer.querySelectorAll("input[type='number']").forEach((input) => {
+      input.disabled = !enabled;
     });
   }
 
@@ -279,7 +320,7 @@ class FalloutSaveEditorApp {
         if (saveBtn) saveBtn.disabled = false;
       } else {
         validationMsg.innerHTML = `Validation errors:<br>${validation.errors.join(
-          "<br>"
+          "<br>",
         )}`;
         validationMsg.className = "validation-message error";
         if (saveBtn) saveBtn.disabled = true;
@@ -297,7 +338,7 @@ class FalloutSaveEditorApp {
     if (!this.currentSaveData) {
       console.error("No save data detected");
       this.showSaveError(
-        "Failed to find current save data. Try loading it again"
+        "Failed to find current save data. Try loading it again",
       );
       return;
     }
@@ -309,7 +350,7 @@ class FalloutSaveEditorApp {
       const editor = new SaveEditor();
       this.modifiedSaveData = editor.modifyData(
         this.currentSaveData,
-        this.config
+        this.config,
       );
       const exportUpdated = document.getElementById("exportUpdatedBtn");
       if (exportUpdated) {
@@ -321,7 +362,7 @@ class FalloutSaveEditorApp {
       await encryptor.encryptObject(this.filename, this.modifiedSaveData);
 
       this.showSaveSuccess(
-        "Save file processed successfully! Download should start automatically."
+        "Save file processed successfully! Download should start automatically.",
       );
     } catch (error) {
       console.error("File processing error:", error);
@@ -338,7 +379,7 @@ class FalloutSaveEditorApp {
     if (!this.currentSaveData) {
       console.error("No save data detected");
       this.showLoadError(
-        "Failed to find current save data. Try loading it again"
+        "Failed to find current save data. Try loading it again",
       );
       return;
     }
@@ -361,7 +402,7 @@ class FalloutSaveEditorApp {
    */
   async handleExportUpdatedJson() {
     if (!this.modifiedSaveData) {
-      console.error("No updated sae data detected");
+      console.error("No updated save data detected");
       this.showSaveError("Failed to find updated save data. Try saving again");
       return;
     }
@@ -407,6 +448,20 @@ class FalloutSaveEditorApp {
       }
     });
 
+    // Per-item inventory counts — read from dynamically-rendered inputs
+    const giveInventoryCounts = {};
+    const allItemIds = new Set([
+      ...this.config.giveInventoryOutfitIds,
+      ...this.config.giveInventoryWeaponIds,
+    ]);
+    allItemIds.forEach((itemId) => {
+      const input = document.getElementById(`inventoryCount_${itemId}`);
+      if (input) {
+        giveInventoryCounts[itemId] = parseInt(input.value, 10) || 0;
+      }
+    });
+    config.giveInventoryCounts = giveInventoryCounts;
+
     return config;
   }
 
@@ -430,7 +485,7 @@ class FalloutSaveEditorApp {
       if (!validation.isValid) {
         console.error("File load errors:", validation.errors);
         this.showLoadError(
-          "Failed to load save file: " + validation.errors.join(", ")
+          "Failed to load save file: " + validation.errors.join(", "),
         );
       } else {
         this.config = {
@@ -474,14 +529,14 @@ class FalloutSaveEditorApp {
       const cnt = this.currentSaveData.dwellers.actors.filter(
         (a) =>
           a.characterType == SaveEditor.CHARACTER_TYPES.handy &&
-          a.savedRoom == -1
+          a.savedRoom == -1,
       ).length;
       waitingHandyCountPlaceholder.textContent = `(current waiting: ${cnt})`;
     }
 
     // Returning explorers count
     const returningDwellersPlaceholder = document.getElementById(
-      "returning-dwellers-placeholder"
+      "returning-dwellers-placeholder",
     );
     if (returningDwellersPlaceholder) {
       const cnt = this.currentSaveData.vault.wasteland?.teams.reduce(
@@ -491,19 +546,19 @@ class FalloutSaveEditorApp {
           }
           return prev + team.dwellers.length;
         },
-        0
+        0,
       );
       returningDwellersPlaceholder.textContent = `(current returning: ${cnt})`;
     }
 
     // Exploring dweller count
     const exploringDwellersPlaceholder = document.getElementById(
-      "exploring-dwellers-placeholder"
+      "exploring-dwellers-placeholder",
     );
     if (exploringDwellersPlaceholder) {
       const cnt = this.currentSaveData.vault.wasteland?.teams.reduce(
         (prev, team) => prev + team.dwellers.length,
-        0
+        0,
       );
       exploringDwellersPlaceholder.textContent = ` (current explorers: ${cnt})`;
     }
@@ -628,12 +683,22 @@ class FalloutSaveEditorApp {
   }
 
   /**
-   * Writes config values to placeholder DOM elements
+   * Writes config values to placeholder DOM elements.
+   * Renders per-item count inputs inside #inventoryList.
+   * @param {Object|null} data - Current save data (may be null on initial load)
    */
   updatePlaceholders(data) {
-    // add inventory list
+    // Per-item inventory list with individual count inputs
     const listContainer = document.getElementById("inventoryList");
     if (listContainer && this.config) {
+      // Preserve any values the user has already typed before re-rendering
+      const existingValues = {};
+      listContainer
+        .querySelectorAll("input[type='number']")
+        .forEach((input) => {
+          existingValues[input.dataset.itemId] = input.value;
+        });
+
       listContainer.innerHTML = "";
 
       const items = new Set([
@@ -641,24 +706,57 @@ class FalloutSaveEditorApp {
         ...this.config.giveInventoryWeaponIds,
       ]);
 
-      [...items].sort().forEach((name) => {
-        const listItem = document.createElement("li");
-        let existingCount = null;
-        if (data) {
-          existingCount = data.vault.inventory.items.filter(
-            (item) => item.id === name
-          ).length;
-        }
+      const giveInventoryEnabled =
+        document.getElementById("giveInventory")?.checked ?? false;
 
-        listItem.textContent =
-          existingCount == null
-            ? `"${name}"`
-            : `"${name}" (current: ${existingCount})`;
-        listContainer.appendChild(listItem);
+      [...items].sort().forEach((itemId) => {
+        const currentCount = data
+          ? data.vault.inventory.items.filter((item) => item.id === itemId)
+              .length
+          : null;
+
+        // Determine the starting value for this input:
+        //   1. A previously-typed value (preserved across re-renders)
+        //   2. The per-item target stored in config.giveInventoryCounts
+        //   3. The current in-save count, or 0 as a fallback
+        const savedTarget =
+          this.config.giveInventoryCounts?.[itemId] ?? currentCount ?? 0;
+        const displayValue =
+          existingValues[itemId] !== undefined
+            ? existingValues[itemId]
+            : savedTarget;
+
+        const li = document.createElement("li");
+        li.style.cssText =
+          "display:flex;align-items:center;gap:8px;margin-bottom:4px;";
+
+        const label = document.createElement("span");
+        label.style.cssText = "flex:1;font-size:0.9em;";
+        label.textContent =
+          currentCount !== null
+            ? `${itemId} (current: ${currentCount})`
+            : itemId;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.step = "1";
+        input.className = "number-input";
+        input.id = `inventoryCount_${itemId}`;
+        input.dataset.itemId = itemId;
+        input.value = displayValue;
+        input.disabled = !giveInventoryEnabled;
+        input.style.cssText = "width:70px;";
+        // Trigger validation reset when the user edits a count
+        input.addEventListener("input", this.resetValidation.bind(this));
+
+        li.appendChild(label);
+        li.appendChild(input);
+        listContainer.appendChild(li);
       });
     }
 
-    // best weapon
+    // Best weapon name
     const bestWeaponPlaceholder = document.getElementById("bestWeaponName");
     if (bestWeaponPlaceholder) {
       bestWeaponPlaceholder.textContent = SaveEditor.BEST_WEAPON;
