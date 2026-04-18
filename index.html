@@ -307,7 +307,7 @@
                               id="setIncreaseExploreTime"
                             />
                             Fast forward 5 days for exploring
-                            dwellers&nbsp;<span
+                            dwellers and give bonus caps&nbsp;<span
                               id="exploring-dwellers-placeholder"
                             ></span>
                           </label>
@@ -316,9 +316,7 @@
                           <span class="experimental">Experimental</span>
                         </div>
                         <div class="help-text">
-                          5 days is the in-game max, after which dwellers
-                          automatically turn back. This will not increase the
-                          items that were collected.
+                          This will not increase the items that were collected.
                         </div>
                       </div>
 
@@ -330,6 +328,23 @@
                           />
                           Give all exploring dwellers max Stimpacks and Radaways
                         </label>
+                      </div>
+
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="setJunkCount" />
+                          Give Junk
+                        </label>
+                        <input
+                          id="junkCount"
+                          type="number"
+                          min="0"
+                          step="1"
+                          class="number-input"
+                        />
+                        <div class="help-text">
+                          Will set current count of junk items to target count
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -25,6 +25,7 @@ class FalloutSaveEditorApp {
     "pokerChipCount",
     "ultraciteCount",
     // NOTE: giveInventoryCount is intentionally omitted — counts are now per-item
+    "junkCount",
   ];
 
   BOOLEAN_FIELDS = [
@@ -62,6 +63,7 @@ class FalloutSaveEditorApp {
     "giveQuestItems",
     "setPokerChipCount",
     "setUltraciteCount",
+    "setJunkCount",
   ];
 
   constructor() {
@@ -233,6 +235,10 @@ class FalloutSaveEditorApp {
         checkbox: "setUltraciteCount",
         targets: ["ultraciteCount"],
       },
+      {
+        checkbox: "setJunkCount",
+        targets: ["junkCount"],
+      }
     ];
 
     dependencies.forEach(({ checkbox, targets }) => {

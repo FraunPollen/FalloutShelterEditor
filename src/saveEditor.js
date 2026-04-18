@@ -71,6 +71,30 @@ class SaveEditor {
     Water2: SaveEditor.SPECIALS.per,
   };
 
+  static JUNK_IDS = [
+    "AlarmClock",
+    "BaseballGlove",
+    "BrahminHide",
+    "Camera",
+    "ChemistrySet",
+    "DeskFan",
+    "DuctTape",
+    "GiddyupButtercup",
+    "Globe",
+    "GoldWatch",
+    "MagnifyingGlass",
+    "Microscope",
+    "MilitaryCircuitBoard",
+    "MilitaryDuctTape",
+    "Shovel",
+    "TeddyBear",
+    "TriFoldFlag",
+    "ToyCar",
+    "Wonderglue",
+    "YaoGuaiHide",
+    "Yarn",
+  ];
+
   constructor() {
     this.gameData = {
       weapons: [
@@ -824,7 +848,12 @@ class SaveEditor {
           const special = SaveEditor.ROOM_STAT_MAP[room.type];
           switch (special) {
             case null:
-              if (![SaveEditor.POWER_ARMORS.mix1, SaveEditor.POWER_ARMORS.mix2].includes(dweller.equipedOutfit.id)) {
+              if (
+                ![
+                  SaveEditor.POWER_ARMORS.mix1,
+                  SaveEditor.POWER_ARMORS.mix2,
+                ].includes(dweller.equipedOutfit.id)
+              ) {
                 dweller.equipedOutfit.id = SaveEditor.POWER_ARMORS.mix1;
               }
               break;
@@ -856,7 +885,12 @@ class SaveEditor {
             `Assigned outfit ${dweller.equipedOutfit.id} to dweller ID ${dweller.serializeId} (matched to room ${room.deserializeID}, ${room.type})`,
           );
         } else if (isWasteland) {
-          if (![SaveEditor.POWER_ARMORS.mix1, SaveEditor.POWER_ARMORS.mix2].includes(dweller.equipedOutfit.id)) {
+          if (
+            ![
+              SaveEditor.POWER_ARMORS.mix1,
+              SaveEditor.POWER_ARMORS.mix2,
+            ].includes(dweller.equipedOutfit.id)
+          ) {
             dweller.equipedOutfit.id = SaveEditor.POWER_ARMORS.mix1;
             console.log(
               `Assigned outfit ${dweller.equipedOutfit.id} to exploring dweller ID ${dweller.serializeId}`,
@@ -1046,6 +1080,34 @@ class SaveEditor {
           }
         });
       }
+
+      // Set junk count
+      if (config.setJunkCount) {
+        const targetCount = config.junkCount;
+        SaveEditor.JUNK_IDS.forEach((junkId) => {
+          const existing = data.vault.inventory.items.filter(
+            (i) => i.id === junkId,
+          );
+          if (existing.length === targetCount) {
+            return;
+          }
+          if (existing.length > targetCount) {
+            data.vault.inventory.items = data.vault.inventory.items.filter(
+              (i) => i.id !== junkId,
+            );
+          }
+          if (existing.length < targetCount) {
+            for (let i = 0; i < targetCount - existing.length; i++) {
+              data.vault.inventory.items.push({
+                id: junkId,
+                type: "Junk",
+                hasBeenAssigned: false,
+                hasRandonWeaponBeenAssigned: false,
+              });
+            }
+          }
+        });
+      }
     }
   }
 
@@ -1127,20 +1189,22 @@ class SaveEditor {
       }
 
       // Extend exploration time
-      if (
-        config.setIncreaseExploreTime &&
-        explorer.elapsedTimeAliveExploring < 440000
-      ) {
-        explorer.elapsedTimeAliveExploring = 440000;
+      if (config.setIncreaseExploreTime) {
+        if (explorer.elapsedTimeAliveExploring < 440000) {
+          explorer.elapsedTimeAliveExploring = 440000;
+        }
+        explorer.teamEquipment.storage.resources.Nuka = 150000;
       }
 
       // Give health packs to explorers
       if (config.giveExplorersHealthPacks) {
+        explorer.teamEquipment.storage.resources.StimPack = 25;
+        explorer.teamEquipment.storage.resources.RadAway = 25;
         explorer.dwellers.forEach((dwellerId) => {
           const dweller = data.dwellers.dwellers.find(
             (d) => d.serializeId === dwellerId,
           );
-          if (dweller && dweller.equipment && dweller.equipment.storage) {
+          if (dweller?.equipment?.storage) {
             dweller.equipment.storage.resources.StimPack = 25;
             dweller.equipment.storage.resources.RadAway = 25;
           }
