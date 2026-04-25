@@ -24,8 +24,6 @@ class FalloutSaveEditorApp {
     "lunchboxCount",
     "pokerChipCount",
     "ultraciteCount",
-    // NOTE: giveInventoryCount is intentionally omitted — counts are now per-item
-    "junkCount",
   ];
 
   BOOLEAN_FIELDS = [
@@ -35,6 +33,8 @@ class FalloutSaveEditorApp {
     "equipMaxWeapon",
     "giveExplorersHealthPacks",
     "giveInventory",
+    "givePets",
+    "giveJunk",
     "renameDwellers",
     "setCapsCount",
     "setDeathClawChance",
@@ -59,7 +59,6 @@ class FalloutSaveEditorApp {
     "setStimpackCount",
     "setWaterCount",
     "setRemoveWaitingHandies",
-    "setPetBonusValue",
     "giveQuestItems",
     "setPokerChipCount",
     "setUltraciteCount",
@@ -82,9 +81,14 @@ class FalloutSaveEditorApp {
         SaveEditor.BEST_OUTFITS.agi,
         SaveEditor.BEST_OUTFITS.luk,
       ],
-      giveInventoryWeaponIds: [SaveEditor.BEST_WEAPON],
+      giveInventoryWeaponIds: [
+        SaveEditor.BEST_WEAPON_DEF,
+        ...SaveEditor.WEAPONS,
+      ],
       // Per-item target counts; keyed by item ID. Populated by updatePlaceholders().
       giveInventoryCounts: {},
+      givePetCounts: {},
+      giveJunkCounts: {},
     };
     this.currentSaveData = null;
     this.modifiedSaveData = null;
@@ -212,10 +216,16 @@ class FalloutSaveEditorApp {
           "giveQuestItems",
         ],
       },
-      // NOTE: giveInventory no longer controls a single giveInventoryCount input.
-      // Instead it enables/disables all per-item count inputs rendered in the list.
       {
         checkbox: "giveInventory",
+        targets: [], // per-item inputs are handled separately via _refreshInventoryInputState
+      },
+      {
+        checkbox: "givePets",
+        targets: [], // per-item inputs are handled separately via _refreshInventoryInputState
+      },
+      {
+        checkbox: "giveJunk",
         targets: [], // per-item inputs are handled separately via _refreshInventoryInputState
       },
       {
@@ -235,10 +245,6 @@ class FalloutSaveEditorApp {
         checkbox: "setUltraciteCount",
         targets: ["ultraciteCount"],
       },
-      {
-        checkbox: "setJunkCount",
-        targets: ["junkCount"],
-      }
     ];
 
     dependencies.forEach(({ checkbox, targets }) => {
@@ -257,6 +263,12 @@ class FalloutSaveEditorApp {
           if (checkbox === "giveInventory") {
             this._refreshInventoryInputState(checkboxEl.checked);
           }
+          if (checkbox === "giveJunk") {
+            this._refreshJunkInputState(checkboxEl.checked);
+          }
+          if (checkbox === "givePets") {
+            this._refreshPetsInputState(checkboxEl.checked);
+          }
 
           this.resetValidation();
         });
@@ -273,6 +285,30 @@ class FalloutSaveEditorApp {
    */
   _refreshInventoryInputState(enabled) {
     const listContainer = document.getElementById("inventoryList");
+    if (!listContainer) return;
+    listContainer.querySelectorAll("input[type='number']").forEach((input) => {
+      input.disabled = !enabled;
+    });
+  }
+
+  /**
+   * Enable or disable all per-item junk count inputs inside #junkList
+   * @param {boolean} enabled
+   */
+  _refreshJunkInputState(enabled) {
+    const listContainer = document.getElementById("junkList");
+    if (!listContainer) return;
+    listContainer.querySelectorAll("input[type='number']").forEach((input) => {
+      input.disabled = !enabled;
+    });
+  }
+
+  /**
+   * Enable or disable all per-item pet count inputs inside #petList
+   * @param {boolean} enabled
+   */
+  _refreshPetsInputState(enabled) {
+    const listContainer = document.getElementById("petList");
     if (!listContainer) return;
     listContainer.querySelectorAll("input[type='number']").forEach((input) => {
       input.disabled = !enabled;
@@ -467,6 +503,28 @@ class FalloutSaveEditorApp {
       }
     });
     config.giveInventoryCounts = giveInventoryCounts;
+
+    // Per-item pet counts — read from dynamically-rendered inputs
+    const givePetCounts = {};
+    const allPetIds = new Set([...Object.keys(SaveEditor.PETS)]);
+    allPetIds.forEach((petBonus) => {
+      const input = document.getElementById(`petCount_${petBonus}`);
+      if (input) {
+        givePetCounts[petBonus] = parseInt(input.value, 10) || 0;
+      }
+    });
+    config.givePetCounts = givePetCounts;
+
+    // Per-item junk counts — read from dynamically-rendered inputs
+    const giveJunkCounts = {};
+    const allJunkIds = new Set([...SaveEditor.JUNK_IDS]);
+    allJunkIds.forEach((itemId) => {
+      const input = document.getElementById(`junkCount_${itemId}`);
+      if (input) {
+        giveJunkCounts[itemId] = parseInt(input.value, 10) || 0;
+      }
+    });
+    config.giveJunkCounts = giveJunkCounts;
 
     return config;
   }
@@ -689,11 +747,10 @@ class FalloutSaveEditorApp {
   }
 
   /**
-   * Writes config values to placeholder DOM elements.
    * Renders per-item count inputs inside #inventoryList.
    * @param {Object|null} data - Current save data (may be null on initial load)
    */
-  updatePlaceholders(data) {
+  updatePlaceholdersInventory(data) {
     // Per-item inventory list with individual count inputs
     const listContainer = document.getElementById("inventoryList");
     if (listContainer && this.config) {
@@ -728,7 +785,9 @@ class FalloutSaveEditorApp {
         const savedTarget =
           this.config.giveInventoryCounts?.[itemId] ?? currentCount ?? 0;
         const displayValue =
-          existingValues[itemId] !== undefined
+          currentCount != null 
+            ? currentCount
+            : existingValues[itemId] !== undefined
             ? existingValues[itemId]
             : savedTarget;
 
@@ -761,11 +820,171 @@ class FalloutSaveEditorApp {
         listContainer.appendChild(li);
       });
     }
+  }
+
+  /**
+   * Renders per-item count inputs inside #petList.
+   * @param {Object|null} data - Current save data (may be null on initial load)
+   */
+  updatePlaceholdersPets(data) {
+    // Per-item pet list with individual count inputs
+    const listContainer = document.getElementById("petList");
+    if (listContainer && this.config) {
+      // Preserve any values the user has already typed before re-rendering
+      const existingValues = {};
+      listContainer
+        .querySelectorAll("input[type='number']")
+        .forEach((input) => {
+          existingValues[input.dataset.itemId] = input.value;
+        });
+
+      listContainer.innerHTML = "";
+
+      const pets = new Set([...Object.keys(SaveEditor.PETS)]);
+
+      const givePetsEnabled =
+        document.getElementById("givePets")?.checked ?? false;
+
+      [...pets].sort().forEach((petBonus) => {
+        const currentCount = data
+          ? data.vault.inventory.items.filter(
+              (item) =>
+                item.type === "Pet" && item.extraData.bonus === petBonus,
+            ).length
+          : null;
+
+        // Determine the starting value for this input:
+        //   1. A previously-typed value (preserved across re-renders)
+        //   2. The per-item target stored in config.givePetCounts
+        //   3. The current in-save count, or 0 as a fallback
+        const savedTarget =
+          this.config.givePetCounts?.[petBonus] ?? currentCount ?? 0;
+        const displayValue =
+          currentCount != null 
+            ? currentCount
+            : existingValues[petBonus] !== undefined
+            ? existingValues[petBonus]
+            : savedTarget;
+
+        const li = document.createElement("li");
+        li.style.cssText =
+          "display:flex;align-items:center;gap:8px;margin-bottom:4px;margin-left:25px;";
+
+        const label = document.createElement("span");
+        label.style.cssText = "flex:1;font-size:0.9em;";
+        label.textContent =
+          currentCount !== null
+            ? `${petBonus} (bonus: ${SaveEditor.PETS[petBonus].extraData.bonusValue}) (current: ${currentCount})`
+            : `${petBonus} (bonus: ${SaveEditor.PETS[petBonus].extraData.bonusValue})`;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.step = "1";
+        input.className = "number-input";
+        input.id = `petCount_${petBonus}`;
+        input.dataset.itemId = petBonus;
+        input.value = displayValue;
+        input.disabled = !givePetsEnabled;
+        input.style.cssText = "width:70px;";
+        // Trigger validation reset when the user edits a count
+        input.addEventListener("input", this.resetValidation.bind(this));
+
+        li.appendChild(label);
+        li.appendChild(input);
+        listContainer.appendChild(li);
+      });
+    }
+  }
+
+  /**
+   * Renders per-item count inputs inside #junkList.
+   * @param {Object|null} data - Current save data (may be null on initial load)
+   */
+  updatePlaceholdersJunk(data) {
+    // Per-item junk list with individual count inputs
+    const listContainer = document.getElementById("junkList");
+    if (listContainer && this.config) {
+      // Preserve any values the user has already typed before re-rendering
+      const existingValues = {};
+      listContainer
+        .querySelectorAll("input[type='number']")
+        .forEach((input) => {
+          existingValues[input.dataset.itemId] = input.value;
+        });
+
+      listContainer.innerHTML = "";
+
+      const junkIds = new Set([...SaveEditor.JUNK_IDS]);
+
+      const giveJunkEnabled =
+        document.getElementById("giveJunk")?.checked ?? false;
+
+      [...junkIds].sort().forEach((junkId) => {
+        const currentCount = data
+          ? data.vault.inventory.items.filter(
+              (item) => item.type === "Junk" && item.id === junkId,
+            ).length
+          : null;
+
+        // Determine the starting value for this input:
+        //   1. A previously-typed value (preserved across re-renders)
+        //   2. The per-item target stored in config.giveJunkCounts
+        //   3. The current in-save count, or 0 as a fallback
+        const savedTarget =
+          this.config.giveJunkCounts?.[junkId] ?? currentCount ?? 0;
+        const displayValue =
+          currentCount != null 
+            ? currentCount
+            : existingValues[junkId] !== undefined
+            ? existingValues[junkId]
+            : savedTarget;
+
+        const li = document.createElement("li");
+        li.style.cssText =
+          "display:flex;align-items:center;gap:8px;margin-bottom:4px;margin-left:25px;";
+
+        const label = document.createElement("span");
+        label.style.cssText = "flex:1;font-size:0.9em;";
+        label.textContent =
+          currentCount !== null
+            ? `${junkId} (current: ${currentCount})`
+            : junkId;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.step = "1";
+        input.className = "number-input";
+        input.id = `junkCount_${junkId}`;
+        input.dataset.itemId = junkId;
+        input.value = displayValue;
+        input.disabled = !giveJunkEnabled;
+        input.style.cssText = "width:70px;";
+        // Trigger validation reset when the user edits a count
+        input.addEventListener("input", this.resetValidation.bind(this));
+
+        li.appendChild(label);
+        li.appendChild(input);
+        listContainer.appendChild(li);
+      });
+    }
+  }
+
+  /**
+   * Writes config values to placeholder DOM elements.
+   * @param {Object|null} data - Current save data (may be null on initial load)
+   */
+  updatePlaceholders(data) {
+    // Per-item inventory list with individual count inputs
+    this.updatePlaceholdersInventory(data);
+    this.updatePlaceholdersJunk(data);
+    this.updatePlaceholdersPets(data);
 
     // Best weapon name
     const bestWeaponPlaceholder = document.getElementById("bestWeaponName");
     if (bestWeaponPlaceholder) {
-      bestWeaponPlaceholder.textContent = SaveEditor.BEST_WEAPON;
+      bestWeaponPlaceholder.textContent = SaveEditor.BEST_WEAPON_DEF;
     }
   }
 }

@@ -306,8 +306,8 @@
                               type="checkbox"
                               id="setIncreaseExploreTime"
                             />
-                            Fast forward 5 days for exploring
-                            dwellers and give bonus caps&nbsp;<span
+                            Fast forward 5 days for exploring dwellers and give
+                            bonus caps&nbsp;<span
                               id="exploring-dwellers-placeholder"
                             ></span>
                           </label>
@@ -332,19 +332,29 @@
 
                       <div class="form-group">
                         <label>
-                          <input type="checkbox" id="setJunkCount" />
-                          Give Junk
+                          <input type="checkbox" id="giveJunk" />
+                          Add junk to inventory:
                         </label>
-                        <input
-                          id="junkCount"
-                          type="number"
-                          min="0"
-                          step="1"
-                          class="number-input"
-                        />
                         <div class="help-text">
-                          Will set current count of junk items to target count
+                          For each listed item, set the target count you want in
+                          the inventory. Junk counts *will* be changed to meet these values
                         </div>
+                        <!-- Per-item junk list rendered by updatePlaceholders() -->
+                        <ul id="junkList" class="junk-list"></ul>
+                      </div>
+                      
+                      <div class="form-group">
+                        <label>
+                          <input type="checkbox" id="givePets" />
+                          Add pets to inventory:
+                        </label>
+                        <div class="help-text">
+                          For each listed item, set the target count you want in
+                          the inventory. Pets already at or above the target
+                          will not be changed.
+                        </div>
+                        <!-- Per-item pet list rendered by updatePlaceholders() -->
+                        <ul id="petList" class="pet-list"></ul>
                       </div>
                     </div>
                   </div>
@@ -361,7 +371,7 @@
                       <div class="form-group">
                         <label>
                           <input type="checkbox" id="setMaxMrHandyHealth" />
-                          Overwrite Max Mr. Handy Health:
+                          Set Mr. Handy Health:
                         </label>
                         <input
                           id="maxMrHandyHealth"
@@ -375,7 +385,7 @@
                       <div class="form-group">
                         <label>
                           <input type="checkbox" id="setMaxDwellerHealth" />
-                          Overwrite Max Dweller Health:
+                          Set Dweller Health:
                         </label>
                         <input
                           id="maxDwellerHealth"
@@ -414,18 +424,7 @@
                           class="number-input"
                         />
                       </div>
-
-                      <div class="form-group">
-                        <label>
-                          <input type="checkbox" id="setPetBonusValue" />
-                          Boost Pet Bonus Value
-                          <span class="experimental">Experimental</span>
-                        </label>
-                        <div class="help-text">
-                          Overwrites pet boosts with a large value
-                        </div>
-                      </div>
-
+                      
                       <div class="form-group">
                         <label>
                           <input type="checkbox" id="renameDwellers" />
@@ -468,7 +467,7 @@
                             Equip all dwellers with "<span
                               id="bestWeaponName"
                             ></span
-                            >"
+                            >" (best for vault defence)
                           </label>
                           <div class="help-text warning">
                             This will permanently replace all equipped weapons.
