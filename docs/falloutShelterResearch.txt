@@ -9,7 +9,7 @@ Editing game:
 
 Weapons:
 - Add weapon code to ["survivalW":"weapons"]
-- Now add to inventory: [{"id":"Fatman_Mirv","type":"Weapon","hasBeenAssigned":false,"hasRandonWeaponBeenAssigned":false},]
+- Now add to inventory: [{"id":"Fatman_Mirv","type":"Weapon","hasBeenAssigned":false,"hasRandomWeaponBeenAssigned":false},]
 - Or replace a dweller's held weapon with Fatman_Mirv
 Fatman_Mirv O32 
 

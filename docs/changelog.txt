@@ -1,5 +1,12 @@
 Changelog
 
+v3.0.0 (09/28/2026)
+- Upgrade to react typescript
+- Add ability to give items to explorers
+- Can now get rid of waiting dwellers
+- More pregnancy options
+- Updated pet options
+
 v2.0.0 (08/06/2025)
 - Updated encryption and decryption logic
 - Revamped UI layout
