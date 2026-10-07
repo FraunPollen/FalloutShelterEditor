@@ -201,4 +201,27 @@ export const PETS: Record<string, PetItem> = {
       bonusValue: 45,
     },
   },
+  ChildSpecialBoost: {
+    id: "turkishvan_l2",
+    type: "Pet",
+    hasBeenAssigned: false,
+    hasRandonWeaponBeenAssigned: false,
+    extraData: {
+      uniqueName: "Pumpkin",
+      bonus: "ChildSpecialBoost",
+      bonusValue: 3,
+    },
+  },
+
+  TrainingNonStop: {
+    id: "mainecoon_l",
+    type: "Pet",
+    hasBeenAssigned: false,
+    hasRandonWeaponBeenAssigned: false,
+    extraData: {
+      uniqueName: "Bangor",
+      bonus: "TrainingNonStopBoost",
+      bonusValue: 30,
+    },
+  },
 };
