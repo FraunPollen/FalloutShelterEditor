@@ -21,8 +21,8 @@ export function modifyDwellers(data: SaveData, config: EditorConfig): void {
 
     if (config.renameDwellers) renameDweller(dweller);
     if (config.setMaxDwellerHealth) {
-      dweller.health.healthValue = config.maxDwellerHealth;
-      dweller.health.maxHealth = config.maxDwellerHealth;
+      dweller.health.healthValue = config.maxDwellerMaxHealth;
+      dweller.health.maxHealth = config.maxDwellerMaxHealth;
     }
     if (config.healDwellers) {
       dweller.health.healthValue = dweller.health.maxHealth;

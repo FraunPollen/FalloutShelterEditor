@@ -60,6 +60,18 @@ export function ItemPicker({
     onChange(next);
   }
 
+  function addAll() {
+    const newValue = sortedCatalog.reduce(
+      (prev, curr) => {
+        prev[curr.id] = pendingCount;
+        return prev;
+      },
+      { ...value } as Record<string, number>,
+    );
+
+    onChange(newValue);
+  }
+
   return (
     <div className="item-picker">
       <div className="item-picker-add-row">
@@ -77,13 +89,16 @@ export function ItemPicker({
         </select>
         <input
           type="number"
-          min={1}
           disabled={disabled}
+          min={0}
           value={pendingCount}
-          onChange={(e) => setPendingCount(Number(e.target.value) || 1)}
+          onChange={(e) => setPendingCount(Number(e.target.value) || 0)}
         />
         <button type="button" disabled={disabled} onClick={addSelection}>
           Add
+        </button>
+        <button type="button" disabled={disabled} onClick={addAll}>
+          Add/Update All
         </button>
       </div>
 

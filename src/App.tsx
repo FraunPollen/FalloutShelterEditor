@@ -68,10 +68,18 @@ export default function App() {
   const [originalFileName, setOriginalFileName] = useState<string>("");
   const [status, setStatus] = useState<string>("");
 
-  const [minMaxDwellerHealth, setMinMaxDwellerHealth] = useState(0);
-  const [minMaxHandyHealth, setMinMaxHandyHealth] = useState(0);
+  const [maxDwellerMaxHealth, setMaxDwellerMaxHealth] = useState(0);
+  const [minDwellerMaxHealth, setMinDwellerMaxHealth] = useState(0);
+
+  const [maxHandyHealth, setMaxHandyHealth] = useState(0);
+  const [minHandyHealth, setMinHandyHealth] = useState(0);
+
   const [minDwellerHappiness, setMinDwellerHappiness] = useState(0);
+  const [maxDwellerHappiness, setMaxDwellerHappiness] = useState(0);
+
   const [maxDwellerRadiation, setMaxDwellerRadiation] = useState(0);
+  const [minDwellerRadiation, setMinDwellerRadiation] = useState(0);
+
   const [pregnantDwellers, setPregnantDwellers] = useState(0);
   const [exploringDwellers, setExploringDwellers] = useState(0);
   const [questingDwellers, setQuestingDwellers] = useState(0);
@@ -100,27 +108,45 @@ export default function App() {
       setOriginalFileName(file.name);
 
       const resources = data.vault.storage?.resources ?? {};
+      const minDwellerMaxHealth = Math.min(
+        ...(data.dwellers.dwellers.map((d) => d.health.maxHealth) ?? 0),
+      );
+      const maxDwellerMaxHealth = Math.min(
+        ...(data.dwellers.dwellers.map((d) => d.health.maxHealth) ?? 0),
+      );
+      const minDwellerRadLevel = Math.max(
+        ...(data.dwellers.dwellers.map((d) => d.health.radiationValue) ?? 0),
+      );
+      const maxDwellerRadLevel = Math.max(
+        ...(data.dwellers.dwellers.map((d) => d.health.radiationValue) ?? 0),
+      );
+      const minDwellerHappiness = Math.min(
+        ...(data.dwellers.dwellers.map((d) => d.happiness.happinessValue) ?? 0),
+      );
+      const maxDwellerHappiness = Math.max(
+        ...(data.dwellers.dwellers.map((d) => d.happiness.happinessValue) ?? 0),
+      );
+      const minMrHandyHealth = Math.min(
+        ...(data.dwellers.actors
+          .filter((a) => a.characterType === CharacterTypes.HANDY)
+          .map((d) => d.health) ?? 0),
+      );
+      const maxMrHandyHealth = Math.min(
+        ...(data.dwellers.actors
+          .filter((a) => a.characterType === CharacterTypes.HANDY)
+          .map((d) => d.health) ?? 0),
+      );
+
       // Every default below is read straight from the loaded save, so the
       // form starts in a "does nothing yet" state that matches reality,
       // rather than requiring the user to re-enter current values first.
       const newConfig: EditorConfig = {
         ...DEFAULT_CONFIG,
         maxDwellerCount: data.dwellers.dwellers.length,
-        maxDwellerHealth: Math.min(
-          ...(data.dwellers.dwellers.map((d) => d.health.maxHealth) ?? 0),
-        ),
-        dwellerRadLevel: Math.max(
-          ...(data.dwellers.dwellers.map((d) => d.health.radiationValue) ?? 0),
-        ),
-        dwellerHappiness: Math.min(
-          ...(data.dwellers.dwellers.map((d) => d.happiness.happinessValue) ??
-            100),
-        ),
-        maxMrHandyHealth: Math.min(
-          ...(data.dwellers.actors
-            .filter((a) => a.characterType === CharacterTypes.HANDY)
-            .map((d) => d.health) ?? 300),
-        ),
+        maxDwellerMaxHealth: minDwellerMaxHealth, // set to lowest
+        dwellerRadLevel: maxDwellerRadLevel, // set to highest
+        dwellerHappiness: minDwellerHappiness, // set to lowest
+        maxMrHandyHealth: minMrHandyHealth, // set to lowest
         capsCount: resources.Nuka ?? 0,
         stimpackCount: resources.StimPack ?? 0,
         radawayCount: resources.RadAway ?? 0,
@@ -139,10 +165,16 @@ export default function App() {
       };
 
       setPregnantDwellers(newConfig.pregnantCount);
-      setMinDwellerHappiness(newConfig.dwellerHappiness);
-      setMaxDwellerRadiation(newConfig.dwellerRadLevel);
-      setMinMaxDwellerHealth(newConfig.maxDwellerHealth);
-      setMinMaxHandyHealth(newConfig.maxMrHandyHealth);
+
+      setMaxDwellerHappiness(maxDwellerHappiness);
+      setMaxDwellerRadiation(maxDwellerRadLevel);
+      setMaxDwellerMaxHealth(maxDwellerMaxHealth);
+      setMaxHandyHealth(maxMrHandyHealth);
+
+      setMinDwellerHappiness(minDwellerHappiness);
+      setMinDwellerRadiation(minDwellerRadLevel);
+      setMinDwellerMaxHealth(minDwellerMaxHealth);
+      setMinHandyHealth(minMrHandyHealth);
 
       const explorers =
         data.vault.wasteland?.teams.reduce(
@@ -324,16 +356,16 @@ export default function App() {
                 onChange={(v) => set("healDwellers", v)}
               />
               <ToggledNumberField
-                label={`Set max health (and heal) (current min: ${minMaxDwellerHealth})`}
+                label={`Heal all dwellers and set max health (current min: ${minDwellerMaxHealth}, max: ${maxDwellerMaxHealth})`}
                 checked={config.setMaxDwellerHealth}
                 onCheckedChange={(v) => set("setMaxDwellerHealth", v)}
-                value={config.maxDwellerHealth}
-                onValueChange={(v) => set("maxDwellerHealth", v)}
+                value={config.maxDwellerMaxHealth}
+                onValueChange={(v) => set("maxDwellerMaxHealth", v)}
                 min={1}
                 max={9999}
               />
               <ToggledNumberField
-                label={`Set radiation level (current max: ${maxDwellerRadiation})`}
+                label={`Set radiation level (current min: ${minDwellerRadiation}, max: ${maxDwellerRadiation})`}
                 checked={config.setDwellerRad}
                 onCheckedChange={(v) => set("setDwellerRad", v)}
                 value={config.dwellerRadLevel}
@@ -342,7 +374,7 @@ export default function App() {
                 max={100}
               />
               <ToggledNumberField
-                label={`Set happiness (current min: ${minDwellerHappiness})`}
+                label={`Set happiness (current min: ${minDwellerHappiness}, max: ${maxDwellerHappiness})`}
                 checked={config.setDwellerHappiness}
                 onCheckedChange={(v) => set("setDwellerHappiness", v)}
                 value={config.dwellerHappiness}
@@ -456,7 +488,7 @@ export default function App() {
                 onChange={(v) => set("healHandies", v)}
               />
               <ToggledNumberField
-                label={`Set max health (and heal) (current min: ${minMaxHandyHealth})`}
+                label={`Heal all Mr. Handies and set max health (current min: ${minHandyHealth}, max: ${maxHandyHealth})`}
                 checked={config.setMaxMrHandyHealth}
                 onCheckedChange={(v) => set("setMaxMrHandyHealth", v)}
                 value={config.maxMrHandyHealth}

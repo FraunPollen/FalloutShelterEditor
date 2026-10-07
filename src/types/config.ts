@@ -41,7 +41,7 @@ export interface EditorConfig {
   healDwellers: boolean;
 
   setMaxDwellerHealth: boolean;
-  maxDwellerHealth: number;
+  maxDwellerMaxHealth: number;
 
   setDwellerRad: boolean;
   dwellerRadLevel: number;
@@ -150,7 +150,7 @@ export const DEFAULT_CONFIG: EditorConfig = {
   healDwellers: false,
 
   setMaxDwellerHealth: false,
-  maxDwellerHealth: 300,
+  maxDwellerMaxHealth: 300,
 
   setDwellerRad: false,
   dwellerRadLevel: 0,
